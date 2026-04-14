@@ -26,7 +26,6 @@
       --timer-running:#16a34a;
       --timer-overtime-a:#f59e0b;
       --timer-overtime-b:#22c55e;
-
       --mode-t:#f97316;
       --mode-t-soft:#ffedd5;
       --mode-k:#14b8a6;
@@ -60,753 +59,141 @@
     }
 
     *{ box-sizing:border-box; }
-
-    html,body{
-      margin:0;
-      padding:0;
-      background:var(--bg);
-      color:var(--text);
-      font-family:Inter, Arial, sans-serif;
-      overflow-x:hidden;
-    }
-
+    html,body{ margin:0; padding:0; background:var(--bg); color:var(--text); font-family:Inter, Arial, sans-serif; overflow-x:hidden; }
     body{ min-width:100%; }
-
-    .app{
-      width:100%;
-      max-width:1500px;
-      margin:0 auto;
-      padding:82px 10px 20px;
-    }
-
-    .row{
-      display:flex;
-      flex-direction:column;
-      gap:16px;
-      align-items:stretch;
-    }
-
-    .col{
-      display:flex;
-      flex-direction:column;
-      gap:16px;
-      width:100%;
-    }
-
+    .app{ width:100%; max-width:1500px; margin:0 auto; padding:82px 10px 20px; }
+    .row{ display:flex; flex-direction:column; gap:16px; align-items:stretch; }
+    .col{ display:flex; flex-direction:column; gap:16px; width:100%; }
     .col-left{ width:100%; }
     .col-right{ width:100%; }
-
-    .card{
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:var(--radius);
-      box-shadow:var(--shadow);
-      padding:14px;
-    }
-
-    .top{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      margin-bottom:12px;
-    }
-
-    h1{
-      margin:0 0 6px 0;
-      font-size:22px;
-      letter-spacing:-0.02em;
-    }
-
-    h2{
-      margin:0 0 10px 0;
-      font-size:16px;
-      letter-spacing:-0.01em;
-    }
-
-    h3{
-      margin:0;
-      font-size:14px;
-      letter-spacing:-0.01em;
-    }
-
-    .subtitle{
-      margin:0;
-      font-size:12px;
-      color:var(--muted);
-      line-height:1.5;
-    }
-
-    .badge{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      border:1px solid var(--line);
-      background:var(--card-2);
-      color:var(--text);
-      border-radius:999px;
-      padding:6px 10px;
-      font-size:11px;
-      white-space:normal;
-      text-align:center;
-    }
-
-    .badge.mode-t-badge{
-      background:var(--mode-t-soft);
-      color:var(--mode-t);
-      border-color:transparent;
-      font-weight:800;
-    }
-
-    .badge.mode-k-badge{
-      background:var(--mode-k-soft);
-      color:var(--mode-k);
-      border-color:transparent;
-      font-weight:800;
-    }
-
+    .card{ background:var(--card); border:1px solid var(--line); border-radius:var(--radius); box-shadow:var(--shadow); padding:14px; }
+    .top{ display:flex; flex-direction:column; gap:10px; margin-bottom:12px; }
+    h1{ margin:0 0 6px 0; font-size:22px; letter-spacing:-0.02em; }
+    h2{ margin:0 0 10px 0; font-size:16px; letter-spacing:-0.01em; }
+    h3{ margin:0; font-size:14px; letter-spacing:-0.01em; }
+    .subtitle{ margin:0; font-size:12px; color:var(--muted); line-height:1.5; }
+    .badge{ display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line); background:var(--card-2); color:var(--text); border-radius:999px; padding:6px 10px; font-size:11px; white-space:normal; text-align:center; }
+    .badge.mode-t-badge{ background:var(--mode-t-soft); color:var(--mode-t); border-color:transparent; font-weight:800; }
+    .badge.mode-k-badge{ background:var(--mode-k-soft); color:var(--mode-k); border-color:transparent; font-weight:800; }
     .group{ margin-bottom:12px; }
-
-    .grid-2, .grid-3, .grid-4{
-      display:grid;
-      gap:10px;
-    }
-
+    .grid-2, .grid-3, .grid-4{ display:grid; gap:10px; }
     .grid-2{ grid-template-columns:1fr; }
     .grid-3{ grid-template-columns:1fr; }
     .grid-4{ grid-template-columns:1fr; }
-
-    label{
-      display:block;
-      margin-bottom:6px;
-      font-size:12px;
-      font-weight:700;
-      color:var(--text);
+    label{ display:block; margin-bottom:6px; font-size:12px; font-weight:700; color:var(--text); }
+    input[type="text"], input[type="password"], input[type="number"], textarea, select, button{
+      width:100%; font-size:14px; border-radius:14px; border:1px solid var(--line); background:var(--card); padding:10px 12px; color:var(--text);
     }
-
-    input[type="text"],
-    input[type="password"],
-    input[type="number"],
-    textarea,
-    select,
-    button{
-      width:100%;
-      font-size:14px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background:var(--card);
-      padding:10px 12px;
-      color:var(--text);
-    }
-
-    textarea{
-      min-height:180px;
-      resize:vertical;
-      line-height:1.6;
-    }
-
+    textarea{ min-height:180px; resize:vertical; line-height:1.6; }
     .small-textarea{ min-height:100px; }
     .mini-textarea{ min-height:82px; }
-
-    button{
-      border:none;
-      background:var(--accent);
-      color:#fff;
-      font-weight:700;
-      cursor:pointer;
-      transition:transform .08s ease, opacity .15s ease, background .15s ease, filter .15s ease;
-    }
-
+    button{ border:none; background:var(--accent); color:#fff; font-weight:700; cursor:pointer; transition:transform .08s ease, opacity .15s ease, background .15s ease, filter .15s ease; }
     button:hover{ opacity:.95; }
     button:active{ transform:translateY(1px); }
     button:disabled{ opacity:.55; cursor:not-allowed; }
-
-    .secondary{
-      background:var(--muted);
-      color:var(--card);
-    }
-
-    .blue{
-      background:var(--accent-2);
-      color:#fff;
-    }
-
-    .danger{
-      background:#b91c1c;
-      color:#fff;
-    }
-
-    .success{
-      background:#166534;
-      color:#fff;
-    }
-
-    .ghost{
-      background:var(--card-2);
-      color:var(--text);
-      border:1px solid var(--line);
-    }
-
-    .toggle-btn{
-      background:var(--card-2);
-      color:var(--text);
-      border:1px solid var(--line);
-    }
-
-    .orange{
-      background:var(--mode-t);
-      color:#fff;
-    }
-
-    .turquoise{
-      background:var(--mode-k);
-      color:#052e2b;
-    }
-
-    .btn-row{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-    }
-
-    .btn-row button,
-    .btn-row label.file-btn{
-      width:auto;
-      min-width:80px;
-      flex:1 1 auto;
-      max-width:170px;
-    }
-
-    .file-btn{
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      padding:10px 12px;
-      border-radius:14px;
-      background:var(--muted);
-      color:var(--card);
-      font-weight:700;
-      cursor:pointer;
-      font-size:14px;
-    }
-
+    .secondary{ background:var(--muted); color:var(--card); }
+    .blue{ background:var(--accent-2); color:#fff; }
+    .danger{ background:#b91c1c; color:#fff; }
+    .success{ background:#166534; color:#fff; }
+    .ghost{ background:var(--card-2); color:var(--text); border:1px solid var(--line); }
+    .toggle-btn{ background:var(--card-2); color:var(--text); border:1px solid var(--line); }
+    .orange{ background:var(--mode-t); color:#fff; }
+    .turquoise{ background:var(--mode-k); color:#052e2b; }
+    .btn-row{ display:flex; flex-wrap:wrap; gap:8px; }
+    .btn-row button, .btn-row label.file-btn{ width:auto; min-width:80px; flex:1 1 auto; max-width:170px; }
+    .file-btn{ display:inline-flex; align-items:center; justify-content:center; padding:10px 12px; border-radius:14px; background:var(--muted); color:var(--card); font-weight:700; cursor:pointer; font-size:14px; }
     .hidden{ display:none !important; }
     .collapsed{ display:none !important; }
-
-    .status{
-      margin-top:12px;
-      min-height:40px;
-      padding:10px 12px;
-      border-radius:14px;
-      background:var(--card-2);
-      color:var(--text);
-      font-size:13px;
-      white-space:pre-wrap;
-      line-height:1.5;
-      border:1px solid transparent;
-    }
-
-    .status.ok{
-      background:var(--good-bg);
-      color:var(--good-text);
-    }
-
-    .status.error{
-      background:var(--bad-bg);
-      color:var(--bad-text);
-    }
-
-    .status.info{
-      background:var(--info-bg);
-      color:var(--info-text);
-    }
-
-    .meta{
-      display:flex;
-      flex-wrap:wrap;
-      gap:10px;
-      margin-top:8px;
-      color:var(--muted);
-      font-size:12px;
-    }
-
-    .inline-checks{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      font-size:13px;
-      margin-top:8px;
-    }
-
-    .inline-checks label{
-      display:flex;
-      align-items:center;
-      gap:8px;
-      margin:0;
-      font-weight:500;
-    }
-
-    audio{
-      width:100%;
-      margin-top:12px;
-    }
-
-    .download-link{
-      display:inline-block;
-      margin-top:10px;
-      text-decoration:none;
-      font-weight:700;
-      color:var(--text);
-      font-size:13px;
-    }
-
-    .note{
-      font-size:11px;
-      color:var(--muted);
-      line-height:1.6;
-    }
-
-    .question-list,
-    .error-block-list{
-      display:grid;
-      gap:12px;
-      margin-top:8px;
-    }
-
-    .question-card,
-    .error-block{
-      border:1px solid var(--line);
-      background:var(--card);
-      border-radius:16px;
-      overflow:hidden;
-      box-shadow:0 6px 20px rgba(15,23,42,.05);
-    }
-
-    [data-theme="dark"] .question-card,
-    [data-theme="dark"] .error-block{
-      box-shadow:0 6px 20px rgba(0,0,0,.2);
-    }
-
-    .question-head,
-    .error-block-head{
-      padding:12px 14px;
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      background:var(--card-2);
-      border-bottom:1px solid var(--line);
-    }
-
-    .question-index,
-    .error-index{
-      font-size:11px;
-      color:var(--muted);
-      margin-bottom:4px;
-    }
-
-    .question-text,
-    .error-title{
-      font-weight:700;
-      line-height:1.5;
-      color:var(--text);
-      font-size:14px;
-    }
-
-    .question-actions,
-    .error-actions{
-      display:flex;
-      gap:6px;
-      flex-wrap:wrap;
-    }
-
-    .question-actions button,
-    .error-actions button{
-      min-width:auto;
-      padding:8px 10px;
-      font-size:12px;
-      border-radius:12px;
-      flex:1 1 auto;
-    }
-
-    .question-body,
-    .error-body{
-      padding:12px 14px;
-      display:grid;
-      gap:10px;
-      background:var(--card);
-    }
-
-    .score-pill{
-      display:inline-flex;
-      align-items:center;
-      gap:4px;
-      font-weight:800;
-      font-size:11px;
-      border-radius:999px;
-      padding:6px 10px;
-      background:var(--info-bg);
-      color:var(--info-text);
-      border:1px solid var(--line);
-    }
-
-    .level-pill{
-      display:inline-flex;
-      align-items:center;
-      gap:6px;
-      font-weight:800;
-      font-size:11px;
-      border-radius:999px;
-      padding:6px 10px;
-      border:1px solid transparent;
-      width:max-content;
-    }
-
+    .status{ margin-top:12px; min-height:40px; padding:10px 12px; border-radius:14px; background:var(--card-2); color:var(--text); font-size:13px; white-space:pre-wrap; line-height:1.5; border:1px solid transparent; }
+    .status.ok{ background:var(--good-bg); color:var(--good-text); }
+    .status.error{ background:var(--bad-bg); color:var(--bad-text); }
+    .status.info{ background:var(--info-bg); color:var(--info-text); }
+    .meta{ display:flex; flex-wrap:wrap; gap:10px; margin-top:8px; color:var(--muted); font-size:12px; }
+    .inline-checks{ display:flex; flex-direction:column; gap:10px; font-size:13px; margin-top:8px; }
+    .inline-checks label{ display:flex; align-items:center; gap:8px; margin:0; font-weight:500; }
+    audio{ width:100%; margin-top:12px; }
+    .download-link{ display:inline-block; margin-top:10px; text-decoration:none; font-weight:700; color:var(--text); font-size:13px; }
+    .note{ font-size:11px; color:var(--muted); line-height:1.6; }
+    .question-list, .error-block-list{ display:grid; gap:12px; margin-top:8px; }
+    .question-card, .error-block{ border:1px solid var(--line); background:var(--card); border-radius:16px; overflow:hidden; box-shadow:0 6px 20px rgba(15,23,42,.05); }
+    [data-theme="dark"] .question-card, [data-theme="dark"] .error-block{ box-shadow:0 6px 20px rgba(0,0,0,.2); }
+    .question-head, .error-block-head{ padding:12px 14px; display:flex; flex-direction:column; gap:10px; background:var(--card-2); border-bottom:1px solid var(--line); }
+    .question-index, .error-index{ font-size:11px; color:var(--muted); margin-bottom:4px; }
+    .question-text, .error-title{ font-weight:700; line-height:1.5; color:var(--text); font-size:14px; }
+    .question-actions, .error-actions{ display:flex; gap:6px; flex-wrap:wrap; }
+    .question-actions button, .error-actions button{ min-width:auto; padding:8px 10px; font-size:12px; border-radius:12px; flex:1 1 auto; }
+    .question-body, .error-body{ padding:12px 14px; display:grid; gap:10px; background:var(--card); }
+    .score-pill{ display:inline-flex; align-items:center; gap:4px; font-weight:800; font-size:11px; border-radius:999px; padding:6px 10px; background:var(--info-bg); color:var(--info-text); border:1px solid var(--line); }
+    .level-pill{ display:inline-flex; align-items:center; gap:6px; font-weight:800; font-size:11px; border-radius:999px; padding:6px 10px; border:1px solid transparent; width:max-content; }
     .level-pill.l1{ background:#efe2ff; color:#6b21a8; }
     .level-pill.l2{ background:#dbeafe; color:#1d4ed8; }
     .level-pill.l3{ background:#fee2e2; color:#b91c1c; }
     .level-pill.l4{ background:#fef3c7; color:#b45309; }
-
-    .feedback{
-      padding:10px 12px;
-      border-radius:14px;
-      border:1px solid var(--line);
-      background:var(--card-2);
-    }
-
-    .feedback-title{
-      font-size:12px;
-      font-weight:800;
-      margin-bottom:6px;
-    }
-
-    .feedback ul{
-      margin:0;
-      padding-left:16px;
-      line-height:1.5;
-      font-size:13px;
-    }
-
-    .feedback-grid,
-    .error-field-grid{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:10px;
-    }
-
-    .error-field{
-      border:1px solid var(--line);
-      background:var(--card-2);
-      border-radius:14px;
-      padding:12px;
-    }
-
-    .error-field-name{
-      font-size:11px;
-      font-weight:800;
-      color:var(--muted);
-      margin-bottom:6px;
-      text-transform:uppercase;
-      letter-spacing:.04em;
-    }
-
-    .error-field-value{
-      font-size:14px;
-      line-height:1.6;
-      white-space:pre-wrap;
-      word-break:break-word;
-    }
-
-    .empty{
-      border:1px dashed var(--line);
-      border-radius:16px;
-      padding:18px;
-      text-align:center;
-      color:var(--muted);
-      background:var(--card-2);
-      font-size:13px;
-    }
-
-    .toolbar{
-      display:flex;
-      flex-direction:column;
-      gap:10px;
-      margin-bottom:10px;
-    }
-
-    .toolbar-right{
-      display:flex;
-      gap:8px;
-      flex-wrap:wrap;
-    }
-
-    .toolbar-right button{
-      flex:1 1 auto;
-      min-width:100px;
-    }
-
-    .panel-slim{
-      padding:12px;
-      border:1px solid var(--line);
-      background:var(--card-2);
-      border-radius:16px;
-    }
-
-    .floating-controls{
-      position:fixed;
-      top:10px;
-      left:10px;
-      z-index:1000;
-      width:min(380px, calc(100vw - 20px));
-      display:flex;
-      align-items:center;
-      gap:10px;
-    }
-
-    .theme-switch{
-      flex:1 1 auto;
-      min-width:0;
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:999px;
-      padding:8px 12px;
-      cursor:pointer;
-      font-size:12px;
-      font-weight:700;
-      color:var(--text);
-      box-shadow:var(--shadow);
-      white-space:nowrap;
-    }
-
-    .pomodoro-btn{
-      flex:0 0 84px;
-      min-width:0;
-      border-radius:999px;
-      padding:8px 10px;
-      font-size:12px;
-      font-weight:800;
-      text-align:center;
-      box-shadow:var(--shadow);
-      border:1px solid transparent;
-      user-select:none;
-      background:var(--timer-paused);
-      color:#fff;
-    }
-
-    .mode-toggle-btn{
-      flex:0 0 42px;
-      width:42px;
-      height:42px;
-      min-width:42px;
-      min-height:42px;
-      border-radius:999px;
-      box-shadow:var(--shadow);
-      padding:0;
-      display:inline-flex;
-      align-items:center;
-      justify-content:center;
-      font-weight:900;
-      font-size:16px;
-      border:1px solid transparent;
-    }
-
-    .mode-toggle-btn.mode-t{
-      background:var(--mode-t);
-      color:#fff;
-    }
-
-    .mode-toggle-btn.mode-k{
-      background:var(--mode-k);
-      color:#063531;
-    }
-
-    .pomodoro-btn.paused{
-      background:var(--timer-paused);
-      color:#fff;
-    }
-
-    .pomodoro-btn.running{
-      background:var(--timer-running);
-      color:#fff;
-    }
-
-    .pomodoro-btn.overtime{
-      background:var(--timer-overtime-a);
-      color:#fff;
-      animation:pomodoroBlink 1s steps(1, end) infinite;
-    }
-
-    .mode-section{
-      display:block;
-    }
-
-    .mode-section.hidden{
-      display:none !important;
-    }
-
-    .mode-banner{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      padding:12px 14px;
-      border-radius:16px;
-      margin-bottom:16px;
-      border:1px solid transparent;
-    }
-
-    .mode-banner.mode-t{
-      background:var(--mode-t-soft);
-      color:var(--mode-t);
-    }
-
-    .mode-banner.mode-k{
-      background:var(--mode-k-soft);
-      color:var(--mode-k);
-    }
-
-    .mode-banner strong{
-      font-size:14px;
-    }
-
-    .modal-backdrop{
-      position:fixed;
-      inset:0;
-      background:rgba(15,23,42,.55);
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      padding:18px;
-      z-index:2000;
-    }
-
-    .modal{
-      width:min(860px, 100%);
-      max-height:90vh;
-      overflow:auto;
-      background:var(--card);
-      border:1px solid var(--line);
-      border-radius:20px;
-      box-shadow:var(--shadow);
-      padding:16px;
-    }
-
-    .modal-head{
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap:10px;
-      margin-bottom:14px;
-    }
-
-    .modal-close{
-      width:auto;
-      min-width:42px;
-      border-radius:12px;
-      padding:10px 12px;
-    }
-
-    .modal-actions{
-      display:flex;
-      flex-wrap:wrap;
-      gap:8px;
-      margin-top:8px;
-    }
-
-    .kreuzen-layout{
-      display:grid;
-      grid-template-columns:1fr;
-      gap:16px;
-    }
-
-    .sticky-tools{
-      position:sticky;
-      top:70px;
-    }
-
-    @keyframes pomodoroBlink{
-      0%, 49.999%{
-        background:var(--timer-overtime-a);
-        filter:brightness(1);
-      }
-      50%, 100%{
-        background:var(--timer-overtime-b);
-        filter:brightness(1.06);
-      }
-    }
+    .feedback{ padding:10px 12px; border-radius:14px; border:1px solid var(--line); background:var(--card-2); }
+    .feedback-title{ font-size:12px; font-weight:800; margin-bottom:6px; }
+    .feedback ul{ margin:0; padding-left:16px; line-height:1.5; font-size:13px; }
+    .feedback-grid, .error-field-grid{ display:grid; grid-template-columns:1fr; gap:10px; }
+    .error-field{ border:1px solid var(--line); background:var(--card-2); border-radius:14px; padding:12px; }
+    .error-field-name{ font-size:11px; font-weight:800; color:var(--muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em; }
+    .error-field-value{ font-size:14px; line-height:1.6; white-space:pre-wrap; word-break:break-word; }
+    .empty{ border:1px dashed var(--line); border-radius:16px; padding:18px; text-align:center; color:var(--muted); background:var(--card-2); font-size:13px; }
+    .toolbar{ display:flex; flex-direction:column; gap:10px; margin-bottom:10px; }
+    .toolbar-right{ display:flex; gap:8px; flex-wrap:wrap; }
+    .toolbar-right button{ flex:1 1 auto; min-width:100px; }
+    .panel-slim{ padding:12px; border:1px solid var(--line); background:var(--card-2); border-radius:16px; }
+    .floating-controls{ position:fixed; top:10px; left:10px; z-index:1000; width:min(380px, calc(100vw - 20px)); display:flex; align-items:center; gap:10px; }
+    .theme-switch{ flex:1 1 auto; min-width:0; background:var(--card); border:1px solid var(--line); border-radius:999px; padding:8px 12px; cursor:pointer; font-size:12px; font-weight:700; color:var(--text); box-shadow:var(--shadow); white-space:nowrap; }
+    .pomodoro-btn{ flex:0 0 84px; min-width:0; border-radius:999px; padding:8px 10px; font-size:12px; font-weight:800; text-align:center; box-shadow:var(--shadow); border:1px solid transparent; user-select:none; background:var(--timer-paused); color:#fff; }
+    .mode-toggle-btn{ flex:0 0 42px; width:42px; height:42px; min-width:42px; min-height:42px; border-radius:999px; box-shadow:var(--shadow); padding:0; display:inline-flex; align-items:center; justify-content:center; font-weight:900; font-size:16px; border:1px solid transparent; }
+    .mode-toggle-btn.mode-t{ background:var(--mode-t); color:#fff; }
+    .mode-toggle-btn.mode-k{ background:var(--mode-k); color:#063531; }
+    .pomodoro-btn.paused{ background:var(--timer-paused); color:#fff; }
+    .pomodoro-btn.running{ background:var(--timer-running); color:#fff; }
+    .pomodoro-btn.overtime{ background:var(--timer-overtime-a); color:#fff; animation:pomodoroBlink 1s steps(1, end) infinite; }
+    .mode-section{ display:block; }
+    .mode-section.hidden{ display:none !important; }
+    .mode-banner{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px; border-radius:16px; margin-bottom:16px; border:1px solid transparent; }
+    .mode-banner.mode-t{ background:var(--mode-t-soft); color:var(--mode-t); }
+    .mode-banner.mode-k{ background:var(--mode-k-soft); color:var(--mode-k); }
+    .mode-banner strong{ font-size:14px; }
+    .modal-backdrop{ position:fixed; inset:0; background:rgba(15,23,42,.55); display:flex; align-items:center; justify-content:center; padding:18px; z-index:2000; }
+    .modal{ width:min(860px, 100%); max-height:90vh; overflow:auto; background:var(--card); border:1px solid var(--line); border-radius:20px; box-shadow:var(--shadow); padding:16px; }
+    .modal-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px; }
+    .modal-close{ width:auto; min-width:42px; border-radius:12px; padding:10px 12px; }
+    .modal-actions{ display:flex; flex-wrap:wrap; gap:8px; margin-top:8px; }
+    .kreuzen-layout{ display:grid; grid-template-columns:1fr; gap:16px; }
+    .sticky-tools{ position:sticky; top:70px; }
+    @keyframes pomodoroBlink{ 0%, 49.999%{ background:var(--timer-overtime-a); filter:brightness(1);} 50%, 100%{ background:var(--timer-overtime-b); filter:brightness(1.06);} }
 
     @media (min-width: 768px) {
       .app{ padding:88px 12px 30px; }
       .card{ padding:16px; }
-
       .grid-2{ grid-template-columns:1fr 1fr; }
       .grid-3{ grid-template-columns:1fr 1fr; }
       .grid-4{ grid-template-columns:1fr 1fr; }
-
-      .btn-row button,
-      .btn-row label.file-btn{
-        max-width:none;
-      }
-
-      .top{
-        flex-direction:row;
-        justify-content:space-between;
-        align-items:flex-start;
-      }
-
-      .question-head,
-      .error-block-head{
-        flex-direction:row;
-        justify-content:space-between;
-        align-items:flex-start;
-      }
-
-      .toolbar{
-        flex-direction:row;
-        justify-content:space-between;
-        align-items:center;
-      }
-
-      .inline-checks{
-        flex-direction:row;
-        flex-wrap:wrap;
-        gap:16px;
-      }
-
-      .feedback-grid,
-      .error-field-grid{
-        grid-template-columns:1fr 1fr;
-      }
-
-      .floating-controls{
-        width:430px;
-      }
+      .btn-row button, .btn-row label.file-btn{ max-width:none; }
+      .top{ flex-direction:row; justify-content:space-between; align-items:flex-start; }
+      .question-head, .error-block-head{ flex-direction:row; justify-content:space-between; align-items:flex-start; }
+      .toolbar{ flex-direction:row; justify-content:space-between; align-items:center; }
+      .inline-checks{ flex-direction:row; flex-wrap:wrap; gap:16px; }
+      .feedback-grid, .error-field-grid{ grid-template-columns:1fr 1fr; }
+      .floating-controls{ width:430px; }
     }
 
     @media (min-width: 1024px) {
       .app{ padding:92px 14px 36px; }
       .card{ padding:18px; }
-
       .row{ flex-direction:row; }
       .col-left{ width:780px; flex:0 0 780px; }
       .col-right{ width:680px; flex:0 0 680px; }
-
       .grid-3{ grid-template-columns:1fr 1fr 1fr; }
       .grid-4{ grid-template-columns:1fr 1fr 1fr 1fr; }
-
-      .btn-row button,
-      .btn-row label.file-btn{
-        min-width:120px;
-      }
-
+      .btn-row button, .btn-row label.file-btn{ min-width:120px; }
       h1{ font-size:26px; }
       h2{ font-size:18px; }
       .subtitle{ font-size:13px; }
       .badge{ font-size:12px; padding:8px 12px; }
-      input[type="text"],
-      input[type="password"],
-      input[type="number"],
-      textarea,
-      select,
-      button{ padding:12px 14px; }
+      input[type="text"], input[type="password"], input[type="number"], textarea, select, button{ padding:12px 14px; }
       textarea{ min-height:240px; }
       .small-textarea{ min-height:110px; }
       .status{ min-height:48px; padding:12px 14px; font-size:14px; }
@@ -830,10 +217,7 @@
       .panel-slim{ padding:14px; }
       .floating-controls{ width:450px; }
       .theme-switch, .pomodoro-btn{ font-size:13px; }
-      .kreuzen-layout{
-        grid-template-columns:420px minmax(0, 1fr);
-        align-items:start;
-      }
+      .kreuzen-layout{ grid-template-columns:420px minmax(0, 1fr); align-items:start; }
     }
   </style>
 </head>
@@ -841,7 +225,7 @@
   <div class="floating-controls">
     <button class="theme-switch" id="themeSwitch" type="button">🌙 Dark</button>
     <button class="pomodoro-btn paused" id="pomodoroBtn" type="button">50</button>
-    <button class="mode-toggle-btn mode-t" id="modeToggleBtn" type="button" title="Modus wechseln">O</button>
+    <button class="mode-toggle-btn mode-t" id="modeToggleBtn" type="button" title="Modus wechseln">T</button>
   </div>
 
   <div class="app">
@@ -849,7 +233,6 @@
       <div class="top">
         <div>
           <h1>Med TTS + Active Recall + Kreuzen</h1>
-
         </div>
         <div class="badge" id="apiStateBadge">Keys noch nicht vollständig gesetzt</div>
       </div>
@@ -861,8 +244,8 @@
         </div>
 
         <div class="group">
-          <label for="startupApiKeyChat">API Key · openai/gpt-4o-mini</label>
-          <input id="startupApiKeyChat" type="password" placeholder="Key für gpt-4o-mini" />
+          <label for="startupApiKeyChat">API Key · Standard-Chatmodell</label>
+          <input id="startupApiKeyChat" type="password" placeholder="Key für Standard-Chatmodell" />
         </div>
       </div>
 
@@ -894,6 +277,21 @@
         </div>
       </div>
 
+      <div class="grid-2">
+        <div class="group">
+          <label for="startupChatModel">Chat-Modell</label>
+          <select id="startupChatModel">
+            <option value="openai/gpt-4o-mini">openai/gpt-4o-mini</option>
+            <option value="openai/gpt-5.4">openai/gpt-5.4</option>
+          </select>
+        </div>
+
+        <div class="group">
+          <label for="startupApiKeyGpt54">API Key · openai/gpt-5.4 (optional Override)</label>
+          <input id="startupApiKeyGpt54" type="password" placeholder="Optional eigener Key nur für openai/gpt-5.4" />
+        </div>
+      </div>
+
       <div class="btn-row">
         <button id="saveStartupBtn" class="success" type="button">Lokal speichern</button>
         <button id="hideStartupBtn" class="secondary" type="button">Startfeld einklappen</button>
@@ -901,11 +299,9 @@
       </div>
 
       <div class="note" style="margin-top:10px;">
-        API-Keys und Inhalte bleiben lokal gespeichert. TTS, Fragenmodus und Kreuzen-Modus können parallel im selben Interface genutzt werden.
+        API-Keys und Inhalte bleiben lokal gespeichert. TTS, Fragenmodus und Kreuzen-Modus können parallel im selben Interface genutzt werden. Wenn openai/gpt-5.4 ausgewählt ist, wird zuerst der GPT-5.4-Override-Key verwendet; falls leer, automatisch der Standard-Chat-Key.
       </div>
     </div>
-
-
 
     <div id="tModeSection" class="mode-section">
       <div class="row">
@@ -930,8 +326,23 @@
                 </div>
 
                 <div class="group">
-                  <label for="apiKeyChat">API Key · openai/gpt-4o-mini</label>
-                  <input id="apiKeyChat" type="password" placeholder="Key für gpt-4o-mini" />
+                  <label for="apiKeyChat">API Key · Standard-Chatmodell</label>
+                  <input id="apiKeyChat" type="password" placeholder="Key für aktuelles Standard-Chatmodell" />
+                </div>
+              </div>
+
+              <div class="grid-2">
+                <div class="group">
+                  <label for="apiKeyGpt54">API Key · openai/gpt-5.4 (optional Override)</label>
+                  <input id="apiKeyGpt54" type="password" placeholder="Optional eigener Key nur für openai/gpt-5.4" />
+                </div>
+
+                <div class="group">
+                  <label for="chatModel">Chat-Modell</label>
+                  <select id="chatModel">
+                    <option value="openai/gpt-4o-mini">openai/gpt-4o-mini</option>
+                    <option value="openai/gpt-5.4">openai/gpt-5.4</option>
+                  </select>
                 </div>
               </div>
 
@@ -986,6 +397,8 @@
                 <label><input type="checkbox" id="saveSettings" checked /> Einstellungen lokal speichern</label>
                 <label><input type="checkbox" id="autoPlay" checked /> Audio automatisch abspielen</label>
                 <label><input type="checkbox" id="autoDownload" /> Audio automatisch herunterladen</label>
+                <label><input type="checkbox" id="permanentSaveEnabled" /> Permanente Speicherung aktivieren</label>
+                <button id="permanentSaveBtn" class="success" type="button">Permanent speichern</button>
               </div>
             </div>
 
@@ -1022,7 +435,6 @@
             <div class="toolbar">
               <div>
                 <h2>Fragen & Antworten</h2>
-
               </div>
               <div class="toolbar-right">
                 <button id="exportBtn" class="secondary" type="button">Export</button>
@@ -1045,7 +457,6 @@
           <div class="top">
             <div>
               <h2>Kreuzen-Modus</h2>
-
             </div>
             <div class="badge mode-k-badge">K-Modus</div>
           </div>
@@ -1064,8 +475,6 @@
           </div>
 
           <div id="kreuzenStatus" class="status">Bereit.</div>
-
-         </div>
         </div>
 
         <div class="card">
@@ -1140,16 +549,15 @@
   <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 
   <script>
-    const STORAGE_KEY = "med_tts_active_recall_v3";
+    const STORAGE_KEY = "med_tts_active_recall_v4_gpt54";
     const TTS_MODEL = "openai/gpt-4o-mini-tts-2025-12-15";
-    const CHAT_MODEL = "openai/gpt-4o-mini";
+    const DEFAULT_CHAT_MODEL = "openai/gpt-4o-mini";
+    const GPT54_MODEL = "openai/gpt-5.4";
 
     const themeSwitch = document.getElementById("themeSwitch");
     const pomodoroBtn = document.getElementById("pomodoroBtn");
     const modeToggleBtn = document.getElementById("modeToggleBtn");
 
-    const modeBannerT = document.getElementById("modeBannerT");
-    const modeBannerK = document.getElementById("modeBannerK");
     const tModeSection = document.getElementById("tModeSection");
     const kModeSection = document.getElementById("kModeSection");
 
@@ -1157,6 +565,8 @@
     const startupBaseUrl = document.getElementById("startupBaseUrl");
     const startupApiKeyTts = document.getElementById("startupApiKeyTts");
     const startupApiKeyChat = document.getElementById("startupApiKeyChat");
+    const startupApiKeyGpt54 = document.getElementById("startupApiKeyGpt54");
+    const startupChatModel = document.getElementById("startupChatModel");
     const startupVoice = document.getElementById("startupVoice");
     const startupQuestionCount = document.getElementById("startupQuestionCount");
     const saveStartupBtn = document.getElementById("saveStartupBtn");
@@ -1167,6 +577,8 @@
     const baseUrlInput = document.getElementById("baseUrl");
     const apiKeyTtsInput = document.getElementById("apiKeyTts");
     const apiKeyChatInput = document.getElementById("apiKeyChat");
+    const apiKeyGpt54Input = document.getElementById("apiKeyGpt54");
+    const chatModelInput = document.getElementById("chatModel");
     const voiceInput = document.getElementById("voice");
     const formatInput = document.getElementById("format");
     const speedInput = document.getElementById("speed");
@@ -1176,9 +588,9 @@
     const saveSettingsCheckbox = document.getElementById("saveSettings");
     const autoPlayCheckbox = document.getElementById("autoPlay");
     const autoDownloadCheckbox = document.getElementById("autoDownload");
-
+    const permanentSaveEnabled = document.getElementById("permanentSaveEnabled");
+    const permanentSaveBtn = document.getElementById("permanentSaveBtn");
     const toggleAdvancedBtn = document.getElementById("toggleAdvancedBtn");
-
     const advancedPanel = document.getElementById("advancedPanel");
 
     const speakBtn = document.getElementById("speakBtn");
@@ -1256,6 +668,28 @@
       return Math.random().toString(36).slice(2) + Date.now().toString(36);
     }
 
+    function getCurrentChatModel() {
+      return (chatModelInput.value || DEFAULT_CHAT_MODEL).trim() || DEFAULT_CHAT_MODEL;
+    }
+
+    function getActiveChatApiKey() {
+      const currentModel = getCurrentChatModel();
+      const standardKey = apiKeyChatInput.value.trim();
+      const gpt54Key = apiKeyGpt54Input.value.trim();
+      if (currentModel === GPT54_MODEL) {
+        return gpt54Key || standardKey;
+      }
+      return standardKey;
+    }
+
+    function getResolvedChatKeyLabel() {
+      const currentModel = getCurrentChatModel();
+      if (currentModel === GPT54_MODEL && apiKeyGpt54Input.value.trim()) {
+        return "GPT-5.4-Override-Key";
+      }
+      return "Standard-Chat-Key";
+    }
+
     function updateStats() {
       const text = textInput.value || "";
       const words = text.trim() ? text.trim().split(/\s+/).length : 0;
@@ -1267,12 +701,16 @@
 
     function updateApiBadge() {
       const hasTts = !!apiKeyTtsInput.value.trim();
-      const hasChat = !!apiKeyChatInput.value.trim();
+      const hasStandardChat = !!apiKeyChatInput.value.trim();
+      const hasGpt54 = !!apiKeyGpt54Input.value.trim();
+      const activeChatKey = !!getActiveChatApiKey();
+      const selectedModel = getCurrentChatModel();
 
-      if (hasTts && hasChat) {
-        apiStateBadge.textContent = "Alle Keys gesetzt";
+      if (hasTts && activeChatKey) {
+        apiStateBadge.textContent = `Bereit · TTS + ${selectedModel}`;
       } else {
-        apiStateBadge.textContent = `Keys gesetzt: ${[hasTts, hasChat].filter(Boolean).length}/2`;
+        const count = [hasTts, hasStandardChat, hasGpt54].filter(Boolean).length;
+        apiStateBadge.textContent = `Gesetzte Keys: ${count}/3 · Modell: ${selectedModel}`;
       }
     }
 
@@ -1280,6 +718,8 @@
       baseUrlInput.value = startupBaseUrl.value;
       apiKeyTtsInput.value = startupApiKeyTts.value;
       apiKeyChatInput.value = startupApiKeyChat.value;
+      apiKeyGpt54Input.value = startupApiKeyGpt54.value;
+      chatModelInput.value = startupChatModel.value || DEFAULT_CHAT_MODEL;
       voiceInput.value = startupVoice.value;
       questionCountInput.value = startupQuestionCount.value;
       updateApiBadge();
@@ -1289,6 +729,8 @@
       startupBaseUrl.value = baseUrlInput.value;
       startupApiKeyTts.value = apiKeyTtsInput.value;
       startupApiKeyChat.value = apiKeyChatInput.value;
+      startupApiKeyGpt54.value = apiKeyGpt54Input.value;
+      startupChatModel.value = chatModelInput.value || DEFAULT_CHAT_MODEL;
       startupVoice.value = voiceInput.value;
       startupQuestionCount.value = questionCountInput.value;
       updateApiBadge();
@@ -1296,26 +738,21 @@
 
     function applyModeUI() {
       const isT = appState.mode === "T";
-
       tModeSection.classList.toggle("hidden", !isT);
       kModeSection.classList.toggle("hidden", isT);
-
-      modeBannerT.classList.toggle("hidden", !isT);
-      modeBannerK.classList.toggle("hidden", isT);
-
       modeToggleBtn.textContent = isT ? "T" : "K";
       modeToggleBtn.classList.toggle("mode-t", isT);
       modeToggleBtn.classList.toggle("mode-k", !isT);
       modeToggleBtn.title = isT ? "Wechsel zu Kreuzen-Modus" : "Wechsel zu TTS-Modus";
     }
 
-    function saveState() {
-      if (!saveSettingsCheckbox.checked) return;
-
-      const data = {
+    function buildPersistedState() {
+      return {
         baseUrl: baseUrlInput.value,
         apiKeyTts: apiKeyTtsInput.value,
         apiKeyChat: apiKeyChatInput.value,
+        apiKeyGpt54: apiKeyGpt54Input.value,
+        chatModel: chatModelInput.value || DEFAULT_CHAT_MODEL,
         voice: voiceInput.value,
         format: formatInput.value,
         speed: speedInput.value,
@@ -1325,6 +762,7 @@
         autoPlay: autoPlayCheckbox.checked,
         autoDownload: autoDownloadCheckbox.checked,
         saveSettings: saveSettingsCheckbox.checked,
+        permanentSaveEnabled: permanentSaveEnabled.checked,
         advancedOpen: !advancedPanel.classList.contains("collapsed"),
         startupCollapsed: startupCard.classList.contains("collapsed"),
         questions: appState.questions,
@@ -1332,8 +770,18 @@
         mode: appState.mode,
         theme: document.documentElement.getAttribute("data-theme") || "light"
       };
+    }
 
+    function forceSaveState() {
+      const data = buildPersistedState();
+      data.saveSettings = true;
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      updateApiBadge();
+    }
+
+    function saveState() {
+      if (!saveSettingsCheckbox.checked) return;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(buildPersistedState()));
       updateApiBadge();
     }
 
@@ -1351,6 +799,8 @@
         baseUrlInput.value = data.baseUrl || "https://api.hrz.uni-giessen.de";
         apiKeyTtsInput.value = data.apiKeyTts || "";
         apiKeyChatInput.value = data.apiKeyChat || "";
+        apiKeyGpt54Input.value = data.apiKeyGpt54 || "";
+        chatModelInput.value = data.chatModel || DEFAULT_CHAT_MODEL;
         voiceInput.value = data.voice || "alloy";
         formatInput.value = data.format || "mp3";
         speedInput.value = data.speed || "1.0";
@@ -1361,6 +811,7 @@
         autoPlayCheckbox.checked = data.autoPlay !== false;
         autoDownloadCheckbox.checked = data.autoDownload === true;
         saveSettingsCheckbox.checked = data.saveSettings !== false;
+        permanentSaveEnabled.checked = data.permanentSaveEnabled === true;
 
         appState.questions = Array.isArray(data.questions) ? data.questions : [];
         appState.errorBlocks = Array.isArray(data.errorBlocks) ? data.errorBlocks : [];
@@ -1474,12 +925,12 @@
     }
 
     async function fetchJsonChat({systemPrompt, userPrompt}) {
-      const apiKey = apiKeyChatInput.value.trim();
+      const apiKey = getActiveChatApiKey();
       const baseUrl = baseUrlInput.value.trim().replace(/\/+$/, "");
-      const model = CHAT_MODEL;
+      const model = getCurrentChatModel();
 
       if (!apiKey) {
-        throw new Error(`Kein API-Key für ${CHAT_MODEL} gesetzt.`);
+        throw new Error(`Kein API-Key für ${model} gesetzt. Aktive Quelle: ${getResolvedChatKeyLabel()}.`);
       }
 
       const response = await fetch(`${baseUrl}/v1/chat/completions`, {
@@ -1616,9 +1067,10 @@
 
     async function generateQuestions() {
       const text = textInput.value.trim();
+      const chatModel = getCurrentChatModel();
 
-      if (!apiKeyChatInput.value.trim()) {
-        setStatus(`Bitte den API-Key für ${CHAT_MODEL} setzen.`, "error");
+      if (!getActiveChatApiKey()) {
+        setStatus(`Bitte den API-Key für ${chatModel} setzen.`, "error");
         return;
       }
       if (!text) {
@@ -1627,7 +1079,7 @@
       }
 
       generateQuestionsBtn.disabled = true;
-      setStatus(`Fragen werden generiert ...\nChat-Modell: ${CHAT_MODEL}`, "info");
+      setStatus(`Fragen werden generiert ...\nChat-Modell: ${chatModel}\nKey-Quelle: ${getResolvedChatKeyLabel()}`, "info");
 
       const countRaw = questionCountInput.value.trim();
       const count = countRaw ? Number(countRaw) : null;
@@ -1684,8 +1136,7 @@ Erzeuge nur die Fragen als JSON.
         appState.questions = newQuestions;
         saveState();
         renderQuestions();
-
-        setStatus(`Fragen erfolgreich generiert: ${newQuestions.length}`, "ok");
+        setStatus(`Fragen erfolgreich generiert: ${newQuestions.length}\nChat-Modell: ${chatModel}`, "ok");
       } catch (err) {
         console.error(err);
         setStatus("Fehler bei der Fragengenerierung: " + err.message, "error");
@@ -1697,9 +1148,10 @@ Erzeuge nur die Fragen als JSON.
     async function evaluateQuestion(questionId) {
       const question = appState.questions.find(q => q.id === questionId);
       const originalText = textInput.value.trim();
+      const chatModel = getCurrentChatModel();
 
-      if (!apiKeyChatInput.value.trim()) {
-        setStatus(`Bitte den API-Key für ${CHAT_MODEL} setzen.`, "error");
+      if (!getActiveChatApiKey()) {
+        setStatus(`Bitte den API-Key für ${chatModel} setzen.`, "error");
         return;
       }
       if (!originalText) {
@@ -1715,23 +1167,16 @@ Erzeuge nur die Fragen als JSON.
       const sendBtn = document.querySelector(`[data-eval-id="${questionId}"]`);
       if (sendBtn) sendBtn.disabled = true;
 
-      setStatus(`Antwort wird bewertet ...\nFrage: ${question.question}`, "info");
+      setStatus(`Antwort wird bewertet ...\nFrage: ${question.question}\nChat-Modell: ${chatModel}`, "info");
 
       const systemPrompt = `
-Du bist ein "Active-Recall Medizin Agent" und bewertest Antworten streng, kurz und objektiv sowie Physikums Relevant.
+Du bist ein "Active-Recall Medizin Agent" und bewertest Antworten streng, kurz und objektiv.
 
 SCORING-REGEL:
-0 : komplett falsch oder gefährlich = Kernaussagen falsch, widersprechen gesichertem Wissen, potenziell medizinisch riskant, keine brauchbaren richtigen Inhalte
-10 : fast vollständig falsch = minimale thematische Überschneidung, aber Kernaussagen falsch, starke Konzeptfehler und Halluzinationen
-20 :  sehr große Fehler = Thema erkannt, aber Mechanismen/Definitionen weitgehend falsch, kaum verwertbar
-30 :  teilweise richtige Richtung = einzelne korrekte Aspekte, aber zentrale Inhalte falsch oder fehlend, insgesamt unzureichend
-40 :  deutlich lückenhaft = Grundidee teilweise richtig, aber wichtige Fehler in Logik, Terminologie oder Einordnung
-50 : halb richtig = Kernaussage erkennbar korrekt, aber mehrere relevante Fehler oder Auslassungen
-60 : überwiegend richtig = Hauptaussage korrekt, aber wichtige Details, Einschränkungen oder Differenzierungen fehlen
-70 : gut brauchbar = fachlich korrekt im Kern, kleinere Fehler oder Lücken, insgesamt solide aber nicht präzise genug
-80 : sehr gut = korrekt, strukturiert, weitgehend vollständig, nur kleinere Präzisionsmängel oder vereinfachte Darstellung
-90 : exzellent = sehr präzise, differenziert, nahezu vollständig, kaum Fehler, gute fachliche Tiefe
-100 : ideal = vollständig korrekt, präzise, differenziert, keine relevanten Fehler oder Lücken, exakt auf die Frage zugeschnitten
+- 90–100: alle Kernpunkte korrekt, keine groben Fehler
+- 70–89: Kern korrekt, 1–2 relevante Lücken/Unschärfen
+- 40–69: Teilverständnis, mehrere Lücken oder 1 grober Fehler
+- 0–39: überwiegend falsch/ausweichend
 
 AUSGABE:
 Gib ausschließlich valides JSON zurück in genau diesem Format:
@@ -1771,7 +1216,7 @@ Bewerte die Antwort ausschließlich anhand des Originaltexts.
 
         saveState();
         renderQuestions();
-        setStatus(`Antwort bewertet.\nScore: ${question.result.score}%`, "ok");
+        setStatus(`Antwort bewertet.\nScore: ${question.result.score}%\nChat-Modell: ${chatModel}`, "ok");
       } catch (err) {
         console.error(err);
         setStatus("Fehler bei der Bewertung: " + err.message, "error");
@@ -1782,9 +1227,10 @@ Bewerte die Antwort ausschließlich anhand des Originaltexts.
 
     async function analyzeKreuzenInput() {
       const input = kreuzenInput.value.trim();
+      const chatModel = getCurrentChatModel();
 
-      if (!apiKeyChatInput.value.trim()) {
-        setKreuzenStatus(`Bitte den API-Key für ${CHAT_MODEL} setzen.`, "error");
+      if (!getActiveChatApiKey()) {
+        setKreuzenStatus(`Bitte den API-Key für ${chatModel} setzen.`, "error");
         return;
       }
       if (!input) {
@@ -1793,7 +1239,7 @@ Bewerte die Antwort ausschließlich anhand des Originaltexts.
       }
 
       analyzeKreuzenBtn.disabled = true;
-      setKreuzenStatus(`Eintrag wird analysiert ...\nChat-Modell: ${CHAT_MODEL}`, "info");
+      setKreuzenStatus(`Eintrag wird analysiert ...\nChat-Modell: ${chatModel}\nKey-Quelle: ${getResolvedChatKeyLabel()}`, "info");
 
       const systemPrompt = `
 Du bist ein medizinischer Fehlerlisten-Assistent für den Kreuzen-Modus.
@@ -1808,7 +1254,7 @@ Fehlerarten:
 Regeln:
 - "frage": formuliere die zugrunde liegende Prüfungsfrage oder den Kern des Problems klar und knapp.
 - "fehlerart": nur L1, L2, L3 oder L4.
-- "konzept_erklaert": erkläre das relevante Konzept in dem vorgegebenen detail, klar und prüfungsorientiert.
+- "konzept_erklaert": erkläre das relevante Konzept kurz, klar und prüfungsorientiert.
 - "merksatz": ein kurzer, einprägsamer Merksatz.
 - Keine Zusatztexte.
 - Gib ausschließlich valides JSON zurück in genau diesem Format:
@@ -1851,7 +1297,7 @@ Analysiere die Eingabe und liefere nur das JSON.
         kreuzenInput.value = "";
         saveState();
         renderErrorBlocks();
-        setKreuzenStatus("Fehlerblock erfolgreich erstellt.", "ok");
+        setKreuzenStatus(`Fehlerblock erfolgreich erstellt.\nChat-Modell: ${chatModel}`, "ok");
       } catch (err) {
         console.error(err);
         setKreuzenStatus("Fehler bei der Analyse: " + err.message, "error");
@@ -2151,6 +1597,8 @@ Analysiere die Eingabe und liefere nur das JSON.
       lines.push("MED ACTIVE RECALL EXPORT");
       lines.push("========================");
       lines.push("");
+      lines.push(`Chat-Modell: ${getCurrentChatModel()}`);
+      lines.push("");
       lines.push("Originaltext:");
       lines.push(textInput.value.trim() || "—");
       lines.push("");
@@ -2195,6 +1643,7 @@ Analysiere die Eingabe und liefere nur das JSON.
       const lines = [];
       lines.push("KREUZEN FEHLERLISTE EXPORT");
       lines.push("==========================");
+      lines.push(`Chat-Modell: ${getCurrentChatModel()}`);
       lines.push("");
 
       appState.errorBlocks.forEach((block, i) => {
@@ -2231,7 +1680,7 @@ Analysiere die Eingabe und liefere nur das JSON.
 
         doc.setFont("helvetica", "normal");
         doc.setFontSize(10);
-        doc.text("Strukturierter Export der Fehlerblöcke", 14, 22);
+        doc.text(`Strukturierter Export der Fehlerblöcke · Modell: ${getCurrentChatModel()}`, 14, 22);
 
         const rows = appState.errorBlocks.map((block, index) => [
           String(index + 1),
@@ -2351,8 +1800,10 @@ Analysiere die Eingabe und liefere nur das JSON.
     clearApiBtn.addEventListener("click", () => {
       startupApiKeyTts.value = "";
       startupApiKeyChat.value = "";
+      startupApiKeyGpt54.value = "";
       apiKeyTtsInput.value = "";
       apiKeyChatInput.value = "";
+      apiKeyGpt54Input.value = "";
       saveState();
       updateApiBadge();
       setStatus("Alle API-Keys lokal gelöscht.", "ok");
@@ -2370,12 +1821,28 @@ Analysiere die Eingabe und liefere nur das JSON.
       saveState();
     });
 
-    [startupBaseUrl, startupApiKeyTts, startupApiKeyChat, startupVoice, startupQuestionCount].forEach(el => {
+    permanentSaveBtn.addEventListener("click", () => {
+      saveSettingsCheckbox.checked = true;
+      permanentSaveEnabled.checked = true;
+      syncMainToStartup();
+      forceSaveState();
+      setStatus("Permanent gespeichert. API-Keys bleiben jetzt auch nach versehentlichem Seitenwechsel erhalten.", "ok");
+      setKreuzenStatus("Permanent gespeichert. API-Keys bleiben jetzt auch nach versehentlichem Seitenwechsel erhalten.", "ok");
+    });
+
+    window.addEventListener("pagehide", () => {
+      if (permanentSaveEnabled.checked) {
+        syncMainToStartup();
+        forceSaveState();
+      }
+    });
+
+    [startupBaseUrl, startupApiKeyTts, startupApiKeyChat, startupApiKeyGpt54, startupChatModel, startupVoice, startupQuestionCount].forEach(el => {
       el.addEventListener("input", () => { syncStartupToMain(); saveState(); });
       el.addEventListener("change", () => { syncStartupToMain(); saveState(); });
     });
 
-    [baseUrlInput, apiKeyTtsInput, apiKeyChatInput, voiceInput, formatInput, speedInput, questionCountInput, saveSettingsCheckbox, autoPlayCheckbox, autoDownloadCheckbox].forEach(el => {
+    [baseUrlInput, apiKeyTtsInput, apiKeyChatInput, apiKeyGpt54Input, chatModelInput, voiceInput, formatInput, speedInput, questionCountInput, saveSettingsCheckbox, autoPlayCheckbox, autoDownloadCheckbox, permanentSaveEnabled].forEach(el => {
       el.addEventListener("input", () => { syncMainToStartup(); saveState(); });
       el.addEventListener("change", () => { syncMainToStartup(); saveState(); });
     });
