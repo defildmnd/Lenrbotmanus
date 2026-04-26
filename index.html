@@ -30,6 +30,8 @@
       --mode-t-soft:#ffedd5;
       --mode-k:#14b8a6;
       --mode-k-soft:#ccfbf1;
+      --mode-l:#1d4ed8;
+      --mode-l-soft:#dbeafe;
       --integration:#7e22ce;
       --integration-soft:#f5e8ff;
     }
@@ -58,6 +60,8 @@
       --mode-t-soft:#4a2d14;
       --mode-k:#2dd4bf;
       --mode-k-soft:#123b39;
+      --mode-l:#93c5fd;
+      --mode-l-soft:#152b4a;
       --integration:#d8b4fe;
       --integration-soft:#3b2354;
     }
@@ -79,6 +83,7 @@
     .badge{ display:inline-flex; align-items:center; gap:6px; border:1px solid var(--line); background:var(--card-2); color:var(--text); border-radius:999px; padding:6px 10px; font-size:11px; white-space:normal; text-align:center; }
     .badge.mode-t-badge{ background:var(--mode-t-soft); color:var(--mode-t); border-color:transparent; font-weight:800; }
     .badge.mode-k-badge{ background:var(--mode-k-soft); color:var(--mode-k); border-color:transparent; font-weight:800; }
+    .badge.mode-l-badge{ background:var(--mode-l-soft); color:var(--mode-l); border-color:transparent; font-weight:800; }
     .group{ margin-bottom:12px; }
     .grid-2, .grid-3, .grid-4{ display:grid; gap:10px; }
     .grid-2{ grid-template-columns:1fr; }
@@ -156,6 +161,7 @@
     .mode-toggle-btn{ flex:0 0 42px; width:42px; height:42px; min-width:42px; min-height:42px; border-radius:999px; box-shadow:var(--shadow); padding:0; display:inline-flex; align-items:center; justify-content:center; font-weight:900; font-size:16px; border:1px solid transparent; }
     .mode-toggle-btn.mode-t{ background:var(--mode-t); color:#fff; }
     .mode-toggle-btn.mode-k{ background:var(--mode-k); color:#063531; }
+    .mode-toggle-btn.mode-l{ background:var(--mode-l); color:#fff; }
     .pomodoro-btn.paused{ background:var(--timer-paused); color:#fff; }
     .pomodoro-btn.running{ background:var(--timer-running); color:#fff; }
     .pomodoro-btn.overtime{ background:var(--timer-overtime-a); color:#fff; animation:pomodoroBlink 1s steps(1, end) infinite; }
@@ -164,7 +170,22 @@
     .mode-banner{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:12px 14px; border-radius:16px; margin-bottom:16px; border:1px solid transparent; }
     .mode-banner.mode-t{ background:var(--mode-t-soft); color:var(--mode-t); }
     .mode-banner.mode-k{ background:var(--mode-k-soft); color:var(--mode-k); }
+    .mode-banner.mode-l{ background:var(--mode-l-soft); color:var(--mode-l); }
     .mode-banner strong{ font-size:14px; }
+    .segment-list{ display:grid; gap:12px; margin-top:12px; }
+    .segment-card{ border:1px solid var(--line); background:var(--card); border-radius:16px; overflow:hidden; box-shadow:0 6px 20px rgba(15,23,42,.05); }
+    [data-theme="dark"] .segment-card{ box-shadow:0 6px 20px rgba(0,0,0,.2); }
+    .segment-head{ padding:12px 14px; display:flex; flex-direction:column; gap:10px; background:var(--card-2); border-bottom:1px solid var(--line); }
+    .segment-index{ font-size:11px; color:var(--muted); margin-bottom:4px; }
+    .segment-title{ font-weight:700; line-height:1.5; color:var(--text); font-size:14px; }
+    .segment-actions{ display:flex; gap:6px; flex-wrap:wrap; }
+    .segment-actions button{ min-width:auto; padding:8px 10px; font-size:12px; border-radius:12px; flex:1 1 auto; }
+    .segment-body{ padding:12px 14px; display:grid; gap:10px; background:var(--card); }
+    .segment-field{ border:1px solid var(--line); background:var(--card-2); border-radius:14px; padding:12px; }
+    .segment-label{ font-size:11px; font-weight:800; color:var(--muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em; }
+    .segment-content{ font-size:14px; line-height:1.6; white-space:pre-wrap; word-break:break-word; }
+    .chunk-pill{ display:inline-flex; align-items:center; gap:4px; font-weight:800; font-size:11px; border-radius:999px; padding:6px 10px; background:var(--card-2); color:var(--text); border:1px solid var(--line); }
+    .preview-text{ max-height:180px; overflow:auto; border:1px solid var(--line); border-radius:12px; padding:10px; background:var(--card); white-space:pre-wrap; line-height:1.55; font-size:13px; }
     .modal-backdrop{ position:fixed; inset:0; background:rgba(15,23,42,.55); display:flex; align-items:center; justify-content:center; padding:18px; z-index:2000; }
     .modal{ width:min(860px, 100%); max-height:90vh; overflow:auto; background:var(--card); border:1px solid var(--line); border-radius:20px; box-shadow:var(--shadow); padding:16px; }
     .modal-head{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:14px; }
@@ -183,6 +204,7 @@
       .btn-row button, .btn-row label.file-btn{ max-width:none; }
       .top{ flex-direction:row; justify-content:space-between; align-items:flex-start; }
       .question-head, .error-block-head{ flex-direction:row; justify-content:space-between; align-items:flex-start; }
+      .segment-head{ flex-direction:row; justify-content:space-between; align-items:flex-start; }
       .toolbar{ flex-direction:row; justify-content:space-between; align-items:center; }
       .inline-checks{ flex-direction:row; flex-wrap:wrap; gap:16px; }
       .feedback-grid, .error-field-grid{ grid-template-columns:1fr 1fr; }
@@ -521,6 +543,75 @@
         </div>
       </div>
     </div>
+
+    <div id="lModeSection" class="mode-section hidden">
+      <div class="card">
+        <div class="top">
+          <div>
+            <h2>Lang-Audio-Modus</h2>
+            <p class="subtitle">Langer Text wird in Audio-Blöcke aufgeteilt. Optional wird jeder Block vorab redaktioniert, damit er flüssiger klingt.</p>
+          </div>
+          <div class="badge mode-l-badge">L-Modus</div>
+        </div>
+
+        <div class="grid-2">
+          <div class="group">
+            <label for="apiKeyEditorial">API Key · openai/gpt-5.4 (Redaktion optional)</label>
+            <input id="apiKeyEditorial" type="password" placeholder="Optional: separater Key für Redaktionsschritt" />
+          </div>
+          <div class="group">
+            <label for="longChunkSize">Wörter pro Block</label>
+            <input id="longChunkSize" type="number" min="50" max="2000" step="1" value="515" />
+          </div>
+        </div>
+
+        <div class="inline-checks">
+          <label><input type="checkbox" id="longEnableEditorial" /> Blöcke vor TTS redaktionieren (openai/gpt-5.4)</label>
+          <label><input type="checkbox" id="longAutoPlay" checked /> Blöcke automatisch abspielen</label>
+          <label><input type="checkbox" id="longAutoDownload" /> Blöcke automatisch herunterladen</label>
+        </div>
+
+        <div class="note" style="margin-top:10px;">
+          Stimme, Format und Geschwindigkeit werden aus den bestehenden erweiterten Einstellungen übernommen.
+        </div>
+
+        <div class="group" style="margin-top:14px;">
+          <label for="longAudioText">Text für Lang-Audio</label>
+          <textarea id="longAudioText" placeholder="Hier langen Text einfügen..."></textarea>
+          <div class="meta">
+            <span id="longCharCount">0 Zeichen</span>
+            <span id="longWordCount">0 Wörter</span>
+            <span id="longLineCount">0 Zeilen</span>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button id="longGenerateBtn" type="button">Lang-Audio erzeugen</button>
+          <button id="longPauseBtn" class="secondary" type="button">Pause</button>
+          <button id="longResumeBtn" class="secondary" type="button">Weiter</button>
+          <button id="longStopBtn" class="secondary" type="button">Stop</button>
+          <button id="longClearBtn" class="danger" type="button">Clear</button>
+          <button id="longCopyBtn" class="ghost" type="button">Text kopieren</button>
+          <label class="file-btn" for="longFileInput">.txt laden</label>
+          <input id="longFileInput" type="file" accept=".txt,text/plain" class="hidden" />
+        </div>
+
+        <div id="longStatus" class="status">Bereit.</div>
+        <audio id="longAudioPlayer" controls class="hidden"></audio>
+        <a id="longDownloadLink" class="download-link hidden">Audio herunterladen</a>
+
+        <div id="longQueueMeta" class="panel-slim hidden"></div>
+        <div id="longPreviewPanel" class="panel-slim hidden" style="margin-top:10px;">
+          <div class="segment-label">Redaktionierter Gesamttext</div>
+          <div id="longPreviewContent" class="preview-text"></div>
+          <div class="btn-row" style="margin-top:8px;">
+            <button id="longTogglePreviewBtn" class="ghost" type="button">Volltext anzeigen</button>
+          </div>
+        </div>
+        <div id="longSegmentsContainer" class="segment-list"></div>
+        <div id="longEmptySegments" class="empty">Noch keine Audio-Blöcke vorhanden.</div>
+      </div>
+    </div>
   </div>
 
   <div id="blockModalBackdrop" class="modal-backdrop hidden">
@@ -580,6 +671,21 @@
     const DEFAULT_CHAT_MODEL = "openai/gpt-4o-mini";
     const GPT54_MODEL = "openai/gpt-5.4";
     const TRANSCRIBE_MODEL = "openai/gpt-4o-transcribe";
+    const LONG_AUDIO_EDITOR_MODEL = "openai/gpt-5.4";
+    const LONG_AUDIO_EDITOR_SYSTEM_PROMPT = `Du bist ein praeziser Redaktionsassistent. Deine Aufgabe ist es, einen eingegebenen Text inhaltlich exakt wiederzugeben und sprachlich in gut lesbaren Fliesstext zu ueberfuehren.
+
+Vorgaben:
+- Gib den Inhalt inhaltlich praezise und vollstaendig wieder.
+- Veraendere keine Aussagen, fuege nichts hinzu und lasse nichts weg.
+- Wenn der Eingangstext stichwortartig, unvollstaendig oder fragmentarisch ist, forme ihn nur dann in sinnvolle, grammatikalisch korrekte Saetze um, wenn es fuer Verstaendlichkeit und Lesefluss noetig ist.
+- Der Text soll natuerlich, klar und zusammenhaengend klingen.
+- Erhalte die fachliche Bedeutung und alle relevanten Details exakt.
+- Das Ausgabeformat ist reiner Fliesstext.
+- Keine Kommentare, keine Einleitung, keine Zusammenfassung, keine Erklaerungen.
+- Kein Markdown, keine Fettung, keine Kursivschrift, keine Aufzaehlungen.
+- Zwischen den Absaetzen steht genau eine Leerzeile.
+- Gib ausschliesslich den ueberarbeiteten Text aus.
+- Prinzip: Text rein, Text raus.`;
 
     const themeSwitch = document.getElementById("themeSwitch");
     const pomodoroBtn = document.getElementById("pomodoroBtn");
@@ -587,6 +693,7 @@
 
     const tModeSection = document.getElementById("tModeSection");
     const kModeSection = document.getElementById("kModeSection");
+    const lModeSection = document.getElementById("lModeSection");
 
     const startupCard = document.getElementById("startupCard");
     const startupBaseUrl = document.getElementById("startupBaseUrl");
@@ -670,6 +777,32 @@
     const cancelModalBtn = document.getElementById("cancelModalBtn");
     const saveModalBtn = document.getElementById("saveModalBtn");
 
+    const apiKeyEditorialInput = document.getElementById("apiKeyEditorial");
+    const longChunkSizeInput = document.getElementById("longChunkSize");
+    const longEnableEditorialCheckbox = document.getElementById("longEnableEditorial");
+    const longAutoPlayCheckbox = document.getElementById("longAutoPlay");
+    const longAutoDownloadCheckbox = document.getElementById("longAutoDownload");
+    const longAudioTextInput = document.getElementById("longAudioText");
+    const longGenerateBtn = document.getElementById("longGenerateBtn");
+    const longPauseBtn = document.getElementById("longPauseBtn");
+    const longResumeBtn = document.getElementById("longResumeBtn");
+    const longStopBtn = document.getElementById("longStopBtn");
+    const longClearBtn = document.getElementById("longClearBtn");
+    const longCopyBtn = document.getElementById("longCopyBtn");
+    const longFileInput = document.getElementById("longFileInput");
+    const longStatusEl = document.getElementById("longStatus");
+    const longAudioPlayer = document.getElementById("longAudioPlayer");
+    const longDownloadLink = document.getElementById("longDownloadLink");
+    const longQueueMeta = document.getElementById("longQueueMeta");
+    const longPreviewPanel = document.getElementById("longPreviewPanel");
+    const longPreviewContent = document.getElementById("longPreviewContent");
+    const longTogglePreviewBtn = document.getElementById("longTogglePreviewBtn");
+    const longSegmentsContainer = document.getElementById("longSegmentsContainer");
+    const longEmptySegments = document.getElementById("longEmptySegments");
+    const longCharCount = document.getElementById("longCharCount");
+    const longWordCount = document.getElementById("longWordCount");
+    const longLineCount = document.getElementById("longLineCount");
+
     let currentAudioUrl = null;
     let editingBlockId = null;
 
@@ -691,6 +824,9 @@
     let transcribingQuestionId = null;
     let recordingChunks = [];
     let cancelTranscriptionAfterStop = false;
+    let longAudioSession = null;
+    let longAudioNextChunkTimer = null;
+    let longAudioShowFullPreview = false;
 
     function setStatus(message, type = "info") {
       statusEl.textContent = message;
@@ -702,8 +838,18 @@
       kreuzenStatus.className = "status " + type;
     }
 
+    function setLongStatus(message, type = "info") {
+      longStatusEl.textContent = message;
+      longStatusEl.className = "status " + type;
+    }
+
     function uid() {
       return Math.random().toString(36).slice(2) + Date.now().toString(36);
+    }
+
+    function countWordsFromText(text) {
+      const normalized = String(text || "").trim();
+      return normalized ? normalized.split(/\s+/).length : 0;
     }
 
     function clamp(value, min, max) {
@@ -779,13 +925,28 @@
       return getResolvedChatKeyLabel();
     }
 
+    function getLongAudioEditorialApiKey() {
+      const editorialKey = apiKeyEditorialInput.value.trim();
+      if (editorialKey) return editorialKey;
+      return apiKeyGpt54Input.value.trim() || getActiveChatApiKey() || apiKeyTtsInput.value.trim();
+    }
+
     function updateStats() {
       const text = textInput.value || "";
-      const words = text.trim() ? text.trim().split(/\s+/).length : 0;
+      const words = countWordsFromText(text);
       const lines = text ? text.split(/\n/).length : 0;
       charCount.textContent = `${text.length} Zeichen`;
       wordCount.textContent = `${words} Wörter`;
       lineCount.textContent = `${lines} Zeilen`;
+    }
+
+    function updateLongStats() {
+      const text = longAudioTextInput.value || "";
+      const words = countWordsFromText(text);
+      const lines = text ? text.split(/\n/).length : 0;
+      longCharCount.textContent = `${text.length} Zeichen`;
+      longWordCount.textContent = `${words} Wörter`;
+      longLineCount.textContent = `${lines} Zeilen`;
     }
 
     function updateApiBadge() {
@@ -831,12 +992,21 @@
 
     function applyModeUI() {
       const isT = appState.mode === "T";
+      const isK = appState.mode === "K";
+      const isL = appState.mode === "L";
+
       tModeSection.classList.toggle("hidden", !isT);
-      kModeSection.classList.toggle("hidden", isT);
-      modeToggleBtn.textContent = isT ? "T" : "K";
+      kModeSection.classList.toggle("hidden", !isK);
+      lModeSection.classList.toggle("hidden", !isL);
+
+      modeToggleBtn.textContent = appState.mode;
       modeToggleBtn.classList.toggle("mode-t", isT);
-      modeToggleBtn.classList.toggle("mode-k", !isT);
-      modeToggleBtn.title = isT ? "Wechsel zu Kreuzen-Modus" : "Wechsel zu TTS-Modus";
+      modeToggleBtn.classList.toggle("mode-k", isK);
+      modeToggleBtn.classList.toggle("mode-l", isL);
+
+      const nextMode = isT ? "K" : (isK ? "L" : "T");
+      const modeTitle = nextMode === "T" ? "TTS/Fragen-Modus" : (nextMode === "K" ? "Kreuzen-Modus" : "Lang-Audio-Modus");
+      modeToggleBtn.title = `Wechsel zu ${modeTitle}`;
     }
 
     function buildPersistedState() {
@@ -846,12 +1016,19 @@
         apiKeyChat: apiKeyChatInput.value,
         apiKeyGpt54: apiKeyGpt54Input.value,
         apiKeyTranscribe: apiKeyTranscribeInput.value,
+        apiKeyEditorial: apiKeyEditorialInput.value,
         chatModel: chatModelInput.value || DEFAULT_CHAT_MODEL,
         voice: voiceInput.value,
         format: formatInput.value,
         speed: speedInput.value,
         questionCount: questionCountInput.value,
         text: textInput.value,
+        longAudioText: longAudioTextInput.value,
+        longChunkSize: longChunkSizeInput.value,
+        longEnableEditorial: longEnableEditorialCheckbox.checked,
+        longAutoPlay: longAutoPlayCheckbox.checked,
+        longAutoDownload: longAutoDownloadCheckbox.checked,
+        longAudioShowFullPreview,
         kreuzenInput: kreuzenInput.value,
         autoPlay: autoPlayCheckbox.checked,
         autoDownload: autoDownloadCheckbox.checked,
@@ -887,6 +1064,8 @@
         const raw = localStorage.getItem(STORAGE_KEY);
         if (!raw) {
           updateApiBadge();
+          updateLongStats();
+          renderLongAudioSegments();
           applyModeUI();
           return;
         }
@@ -898,16 +1077,23 @@
         apiKeyChatInput.value = data.apiKeyChat || "";
         apiKeyGpt54Input.value = data.apiKeyGpt54 || "";
         apiKeyTranscribeInput.value = data.apiKeyTranscribe || "";
+        apiKeyEditorialInput.value = data.apiKeyEditorial || "";
         chatModelInput.value = data.chatModel || DEFAULT_CHAT_MODEL;
         voiceInput.value = data.voice || "alloy";
         formatInput.value = data.format || "mp3";
         speedInput.value = data.speed || "1.0";
         questionCountInput.value = data.questionCount || "";
         textInput.value = data.text || "";
+        longAudioTextInput.value = data.longAudioText || "";
+        longChunkSizeInput.value = data.longChunkSize || "515";
         kreuzenInput.value = data.kreuzenInput || "";
+        longAudioShowFullPreview = data.longAudioShowFullPreview === true;
 
         autoPlayCheckbox.checked = data.autoPlay !== false;
         autoDownloadCheckbox.checked = data.autoDownload === true;
+        longEnableEditorialCheckbox.checked = data.longEnableEditorial === true;
+        longAutoPlayCheckbox.checked = data.longAutoPlay !== false;
+        longAutoDownloadCheckbox.checked = data.longAutoDownload === true;
         generateExpectedAnswersCheckbox.checked = data.generateExpectedAnswers === true;
         generateIntegrationQuestionsCheckbox.checked = data.generateIntegrationQuestions === true;
         hideQuestionAudioButtonCheckbox.checked = data.hideQuestionAudioButton === true;
@@ -918,7 +1104,7 @@
           ? data.questions.map((item, idx) => normalizeQuestionItem(item, idx)).filter(Boolean)
           : [];
         appState.errorBlocks = Array.isArray(data.errorBlocks) ? data.errorBlocks : [];
-        appState.mode = data.mode === "K" ? "K" : "T";
+        appState.mode = ["T", "K", "L"].includes(data.mode) ? data.mode : "T";
 
         if (data.advancedOpen) {
           advancedPanel.classList.remove("collapsed");
@@ -941,8 +1127,10 @@
 
         syncMainToStartup();
         updateStats();
+        updateLongStats();
         renderQuestions();
         renderErrorBlocks();
+        renderLongAudioSegments();
         updateApiBadge();
         applyModeUI();
       } catch (e) {
@@ -970,6 +1158,548 @@
       document.body.appendChild(a);
       a.click();
       a.remove();
+    }
+
+    function clearLongAudioWaitTimer() {
+      if (longAudioNextChunkTimer) {
+        clearTimeout(longAudioNextChunkTimer);
+        longAudioNextChunkTimer = null;
+      }
+    }
+
+    function pauseLongSegmentAudios(exceptIndex = null) {
+      longSegmentsContainer.querySelectorAll("audio[data-long-segment-audio]").forEach(el => {
+        const idx = Number(el.dataset.longSegmentIndex);
+        if (exceptIndex !== null && idx === exceptIndex) return;
+        try { el.pause(); } catch {}
+      });
+    }
+
+    function resetLongAudioState() {
+      clearLongAudioWaitTimer();
+      pauseLongSegmentAudios();
+
+      if (longAudioSession && Array.isArray(longAudioSession.chunks)) {
+        longAudioSession.chunks.forEach(chunk => {
+          if (chunk.url) {
+            URL.revokeObjectURL(chunk.url);
+            chunk.url = null;
+          }
+        });
+      }
+
+      longAudioSession = null;
+      longAudioShowFullPreview = false;
+
+      longAudioPlayer.pause();
+      longAudioPlayer.removeAttribute("src");
+      longAudioPlayer.load();
+      longAudioPlayer.classList.add("hidden");
+
+      longDownloadLink.classList.add("hidden");
+      longDownloadLink.removeAttribute("href");
+      longDownloadLink.removeAttribute("download");
+      longDownloadLink.textContent = "Audio herunterladen";
+
+      longQueueMeta.classList.add("hidden");
+      longPreviewPanel.classList.add("hidden");
+      renderLongAudioSegments();
+    }
+
+    function getLongChunkLimit() {
+      const value = Number(longChunkSizeInput.value);
+      if (!Number.isFinite(value)) return 515;
+      return clamp(Math.round(value), 50, 2000);
+    }
+
+    function splitLongTextIntoChunks(text, maxWords) {
+      const normalized = String(text || "").replace(/\s+/g, " ").trim();
+      if (!normalized) return [];
+      const words = normalized.split(" ");
+      const chunks = [];
+
+      for (let i = 0; i < words.length; i += maxWords) {
+        const chunkWords = words.slice(i, i + maxWords);
+        const rawChunkText = chunkWords.join(" ");
+        chunks.push({
+          index: chunks.length,
+          text: rawChunkText,
+          originalText: rawChunkText,
+          wordCount: chunkWords.length,
+          status: "pending",
+          url: null,
+          error: null,
+          generatedAt: null,
+          fileName: "",
+          redactionApplied: false
+        });
+      }
+
+      return chunks;
+    }
+
+    function getLongTailWords(text, wordCount = 26) {
+      const normalized = String(text || "").replace(/\s+/g, " ").trim();
+      if (!normalized) return "";
+      const words = normalized.split(" ");
+      return words.slice(Math.max(0, words.length - wordCount)).join(" ");
+    }
+
+    function extractAssistantContent(content) {
+      if (typeof content === "string") return content.trim();
+      if (Array.isArray(content)) {
+        return content
+          .map(part => {
+            if (typeof part === "string") return part;
+            if (part && typeof part.text === "string") return part.text;
+            return "";
+          })
+          .join("")
+          .trim();
+      }
+      return "";
+    }
+
+    async function requestLongAudioEditorialChunk({ chunkText, previousTail = "", chunkIndex = 0, totalChunks = 1 }) {
+      const apiKey = getLongAudioEditorialApiKey();
+      const baseUrl = baseUrlInput.value.trim().replace(/\/+$/, "");
+
+      if (!apiKey) {
+        throw new Error(`Kein API-Key für ${LONG_AUDIO_EDITOR_MODEL} gesetzt.`);
+      }
+      if (!baseUrl) {
+        throw new Error("Base URL fehlt.");
+      }
+
+      const userPrompt = [
+        `Block ${chunkIndex + 1} von ${totalChunks}.`,
+        "Wichtiger Hinweis: Gib ausschließlich den redaktionierten Text des aktuellen Blocks aus.",
+        previousTail ? `Vorheriger Block (letzte Wörter für Anschluss): ${previousTail}` : "Vorheriger Block (letzte Wörter für Anschluss):",
+        "",
+        "Aktueller Block:",
+        chunkText
+      ].join("\n");
+
+      const response = await fetch(`${baseUrl}/v1/chat/completions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: LONG_AUDIO_EDITOR_MODEL,
+          temperature: 0,
+          messages: [
+            { role: "system", content: LONG_AUDIO_EDITOR_SYSTEM_PROMPT },
+            { role: "user", content: userPrompt }
+          ]
+        })
+      });
+
+      if (!response.ok) {
+        let errorMessage = `HTTP ${response.status}`;
+        try {
+          const data = await response.json();
+          errorMessage = JSON.stringify(data, null, 2);
+        } catch {
+          errorMessage = await response.text();
+        }
+        throw new Error(errorMessage);
+      }
+
+      const data = await response.json();
+      const messageContent = extractAssistantContent(data?.choices?.[0]?.message?.content);
+      if (!messageContent) {
+        throw new Error("Leere Antwort vom Redaktionsmodell erhalten.");
+      }
+      return messageContent;
+    }
+
+    async function requestLongAudioTtsChunk(chunkText) {
+      const apiKey = apiKeyTtsInput.value.trim();
+      const baseUrl = baseUrlInput.value.trim().replace(/\/+$/, "");
+      const voice = voiceInput.value;
+      const format = formatInput.value;
+      const speed = parseFloat(speedInput.value);
+
+      if (!apiKey) {
+        throw new Error(`Kein API-Key für ${TTS_MODEL} gesetzt.`);
+      }
+      if (!baseUrl) {
+        throw new Error("Base URL fehlt.");
+      }
+      if (Number.isNaN(speed) || speed < 0.25 || speed > 4) {
+        throw new Error("Geschwindigkeit muss zwischen 0.25 und 4 liegen.");
+      }
+
+      const response = await fetch(`${baseUrl}/v1/audio/speech`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`
+        },
+        body: JSON.stringify({
+          model: TTS_MODEL,
+          input: chunkText,
+          voice,
+          response_format: format,
+          speed
+        })
+      });
+
+      if (!response.ok) {
+        let errorMessage = `HTTP ${response.status}`;
+        try {
+          const data = await response.json();
+          errorMessage = JSON.stringify(data, null, 2);
+        } catch {
+          errorMessage = await response.text();
+        }
+        throw new Error(errorMessage);
+      }
+
+      return await response.blob();
+    }
+
+    function getLongChunkExt() {
+      return formatInput.value === "pcm" ? "raw" : formatInput.value;
+    }
+
+    function getLongChunkFileName(index) {
+      return `speech_${TTS_MODEL.replaceAll("/", "_")}_part_${String(index + 1).padStart(2, "0")}.${getLongChunkExt()}`;
+    }
+
+    function getLongChunkStatusLabel(status) {
+      if (status === "editing") return "wird redaktioniert";
+      if (status === "loading") return "wird erzeugt";
+      if (status === "ready") return "bereit";
+      if (status === "error") return "Fehler";
+      return "wartet";
+    }
+
+    function updateLongMainAudioForChunk(session, index) {
+      const chunk = session.chunks[index];
+      if (!chunk || !chunk.url) return;
+
+      longAudioPlayer.src = chunk.url;
+      longAudioPlayer.classList.remove("hidden");
+      longDownloadLink.href = chunk.url;
+      longDownloadLink.download = chunk.fileName || getLongChunkFileName(index);
+      longDownloadLink.textContent = `Audio herunterladen (${longDownloadLink.download})`;
+      longDownloadLink.classList.remove("hidden");
+      renderLongAudioSegments();
+    }
+
+    async function generateLongChunkForSession(session, index) {
+      const chunk = session.chunks[index];
+      if (!chunk || session.stopped) return null;
+      if (chunk.status === "ready") return chunk;
+      if (chunk.status === "loading" || chunk.status === "editing") return null;
+
+      try {
+        if (session.useEditorial && !chunk.redactionApplied) {
+          chunk.status = "editing";
+          chunk.error = null;
+          renderLongAudioSegments();
+
+          const previousChunk = session.chunks[index - 1];
+          const previousTail = previousChunk ? getLongTailWords(previousChunk.text) : "";
+          const editedText = await requestLongAudioEditorialChunk({
+            chunkText: chunk.originalText,
+            previousTail,
+            chunkIndex: index,
+            totalChunks: session.chunks.length
+          });
+
+          if (session.id !== (longAudioSession && longAudioSession.id) || session.stopped) {
+            return null;
+          }
+
+          chunk.text = editedText;
+          chunk.wordCount = countWordsFromText(editedText);
+          chunk.redactionApplied = true;
+          renderLongAudioSegments();
+        }
+
+        chunk.status = "loading";
+        chunk.error = null;
+        renderLongAudioSegments();
+
+        const blob = await requestLongAudioTtsChunk(chunk.text);
+        if (session.id !== (longAudioSession && longAudioSession.id) || session.stopped) {
+          return null;
+        }
+
+        chunk.url = URL.createObjectURL(blob);
+        chunk.status = "ready";
+        chunk.generatedAt = new Date().toISOString();
+        chunk.fileName = getLongChunkFileName(index);
+
+        if (longAutoDownloadCheckbox.checked) {
+          triggerDownload(chunk.url, chunk.fileName);
+        }
+
+        renderLongAudioSegments();
+        return chunk;
+      } catch (err) {
+        chunk.status = "error";
+        chunk.error = err.message || "Unbekannter Fehler";
+        renderLongAudioSegments();
+        throw err;
+      }
+    }
+
+    async function startLongChunkGenerationQueue(session, startIndex) {
+      for (let i = startIndex; i < session.chunks.length; i++) {
+        if (!longAudioSession || session.id !== longAudioSession.id || session.stopped) return;
+        try {
+          await generateLongChunkForSession(session, i);
+        } catch (err) {
+          if (!longAudioSession || session.id !== longAudioSession.id || session.stopped) return;
+          setLongStatus(`Fehler bei Audio-Block ${i + 1}: ${err.message}`, "error");
+          return;
+        }
+      }
+
+      if (longAudioSession && session.id === longAudioSession.id && !session.stopped) {
+        setLongStatus(`Alle Audio-Blöcke wurden erzeugt.\nGesamt: ${session.chunks.length} Blöcke.`, "ok");
+      }
+    }
+
+    async function playLongChunkSequentially(index, options = {}) {
+      if (!longAudioSession || longAudioSession.stopped) return;
+      const chunk = longAudioSession.chunks[index];
+      if (!chunk || chunk.status !== "ready") return;
+
+      longAudioSession.currentIndex = index;
+      longAudioSession.manualStop = false;
+      updateLongMainAudioForChunk(longAudioSession, index);
+      pauseLongSegmentAudios();
+
+      if (options.resetTime !== false) {
+        longAudioPlayer.currentTime = 0;
+      }
+
+      if (options.autoPlay !== false) {
+        try { await longAudioPlayer.play(); } catch {}
+      }
+
+      setLongStatus(`Wiedergabe Block ${index + 1}/${longAudioSession.chunks.length}\n${chunk.wordCount} Wörter`, "info");
+    }
+
+    function waitForLongNextChunkAndPlay(index) {
+      clearLongAudioWaitTimer();
+      if (!longAudioSession || longAudioSession.stopped || longAudioSession.manualStop) return;
+
+      const nextChunk = longAudioSession.chunks[index];
+      if (!nextChunk) {
+        setLongStatus("Wiedergabe abgeschlossen.", "ok");
+        return;
+      }
+
+      if (nextChunk.status === "ready") {
+        void playLongChunkSequentially(index, { autoPlay: true, resetTime: true });
+        return;
+      }
+
+      if (nextChunk.status === "error") {
+        setLongStatus(`Wiedergabe angehalten. Audio-Block ${index + 1} konnte nicht erzeugt werden.`, "error");
+        return;
+      }
+
+      setLongStatus(`Warte auf Audio-Block ${index + 1}/${longAudioSession.chunks.length} ...`, "info");
+      longAudioNextChunkTimer = setTimeout(() => waitForLongNextChunkAndPlay(index), 350);
+    }
+
+    function renderLongPreviewText(session) {
+      if (!session || !Array.isArray(session.chunks) || !session.chunks.length) {
+        longPreviewPanel.classList.add("hidden");
+        return;
+      }
+
+      const mergedText = session.chunks.map(chunk => String(chunk.text || chunk.originalText || "").trim()).filter(Boolean).join("\n\n");
+      if (!mergedText) {
+        longPreviewPanel.classList.add("hidden");
+        return;
+      }
+
+      longPreviewPanel.classList.remove("hidden");
+      const previewLimit = 1400;
+      const isLong = mergedText.length > previewLimit;
+      const shouldShowFull = longAudioShowFullPreview || !isLong;
+      const textToRender = shouldShowFull ? mergedText : `${mergedText.slice(0, previewLimit)} ...`;
+      longPreviewContent.innerHTML = escapeHtml(textToRender);
+      longTogglePreviewBtn.textContent = shouldShowFull ? "Kurzansicht anzeigen" : "Volltext anzeigen";
+      longTogglePreviewBtn.classList.toggle("hidden", !isLong);
+    }
+
+    function renderLongAudioSegments() {
+      longSegmentsContainer.innerHTML = "";
+
+      if (!longAudioSession || !Array.isArray(longAudioSession.chunks) || !longAudioSession.chunks.length) {
+        longEmptySegments.classList.remove("hidden");
+        longQueueMeta.classList.add("hidden");
+        longPreviewPanel.classList.add("hidden");
+        return;
+      }
+
+      longEmptySegments.classList.add("hidden");
+
+      const readyCount = longAudioSession.chunks.filter(chunk => chunk.status === "ready").length;
+      const editingCount = longAudioSession.chunks.filter(chunk => chunk.status === "editing").length;
+      const loadingCount = longAudioSession.chunks.filter(chunk => chunk.status === "loading").length;
+      const errorCount = longAudioSession.chunks.filter(chunk => chunk.status === "error").length;
+
+      longQueueMeta.classList.remove("hidden");
+      longQueueMeta.innerHTML = `
+        <div class="meta" style="margin-top:0;">
+          <span>${longAudioSession.chunks.length} Audio-Blöcke</span>
+          <span>${readyCount} bereit</span>
+          <span>${editingCount} Redaktion aktiv</span>
+          <span>${loadingCount} TTS aktiv</span>
+          <span>${errorCount} Fehler</span>
+          <span>Redaktion: ${longAudioSession.useEditorial ? "an" : "aus"}</span>
+          <span>Grenze: ${getLongChunkLimit()} Wörter/Block</span>
+        </div>
+      `;
+
+      renderLongPreviewText(longAudioSession);
+
+      longAudioSession.chunks.forEach((chunk, idx) => {
+        const isCurrent = idx === longAudioSession.currentIndex && !longAudioPlayer.classList.contains("hidden");
+        const excerpt = chunk.text.length > 520 ? `${chunk.text.slice(0, 520)} ...` : chunk.text;
+        const hasLongText = chunk.text.length > 520;
+
+        const card = document.createElement("div");
+        card.className = "segment-card";
+        card.innerHTML = `
+          <div class="segment-head">
+            <div style="flex:1 1 auto;">
+              <div class="segment-index">Audio-Block ${idx + 1}/${longAudioSession.chunks.length}</div>
+              <div class="segment-title">${chunk.wordCount} Wörter · Status: ${escapeHtml(getLongChunkStatusLabel(chunk.status))}${isCurrent ? " · aktuell" : ""}</div>
+            </div>
+            <div class="segment-actions">
+              <div class="chunk-pill">${escapeHtml(getLongChunkStatusLabel(chunk.status))}</div>
+              ${chunk.status === "ready" ? `<button class="ghost" type="button" data-long-play-segment="${idx}">Abspielen</button>` : ""}
+            </div>
+          </div>
+          <div class="segment-body">
+            <div class="segment-field">
+              <div class="segment-label">Redaktionierter Text (Auszug)</div>
+              <div class="segment-content">${escapeHtml(excerpt)}</div>
+              ${hasLongText ? `
+                <details style="margin-top:8px;">
+                  <summary class="note" style="cursor:pointer;">Volltext aufklappen</summary>
+                  <div class="segment-content" style="margin-top:8px;">${escapeHtml(chunk.text)}</div>
+                </details>
+              ` : ""}
+            </div>
+            ${chunk.status === "ready" ? `
+              <audio controls data-long-segment-audio="1" data-long-segment-index="${idx}" src="${chunk.url}"></audio>
+              <a class="download-link" href="${chunk.url}" download="${chunk.fileName || getLongChunkFileName(idx)}">Audio herunterladen (${chunk.fileName || getLongChunkFileName(idx)})</a>
+            ` : ""}
+            ${chunk.status === "error" ? `<div class="status error" style="margin-top:0;">${escapeHtml(chunk.error || "Unbekannter Fehler")}</div>` : ""}
+          </div>
+        `;
+
+        longSegmentsContainer.appendChild(card);
+      });
+
+      longSegmentsContainer.querySelectorAll("[data-long-play-segment]").forEach(btn => {
+        btn.addEventListener("click", async () => {
+          const index = Number(btn.dataset.longPlaySegment);
+          if (!longAudioSession || Number.isNaN(index)) return;
+          longAudioSession.manualStop = false;
+          await playLongChunkSequentially(index, { autoPlay: true, resetTime: true });
+        });
+      });
+
+      longSegmentsContainer.querySelectorAll("audio[data-long-segment-audio]").forEach(el => {
+        el.addEventListener("play", () => {
+          const idx = Number(el.dataset.longSegmentIndex);
+          pauseLongSegmentAudios(idx);
+          longAudioPlayer.pause();
+        });
+      });
+    }
+
+    async function generateLongAudio() {
+      const apiKey = apiKeyTtsInput.value.trim();
+      const text = longAudioTextInput.value.trim();
+      const speed = parseFloat(speedInput.value);
+      const maxWords = getLongChunkLimit();
+      const useEditorial = longEnableEditorialCheckbox.checked;
+
+      if (!apiKey) {
+        setLongStatus("Bitte den API-Key für das TTS-Modell setzen.", "error");
+        return;
+      }
+      if (!text) {
+        setLongStatus("Bitte Text eingeben.", "error");
+        return;
+      }
+      if (Number.isNaN(speed) || speed < 0.25 || speed > 4) {
+        setLongStatus("Geschwindigkeit muss zwischen 0.25 und 4 liegen.", "error");
+        return;
+      }
+      if (useEditorial && !getLongAudioEditorialApiKey()) {
+        setLongStatus(`Bitte API-Key für ${LONG_AUDIO_EDITOR_MODEL} setzen oder Redaktion deaktivieren.`, "error");
+        return;
+      }
+
+      longGenerateBtn.disabled = true;
+      saveState();
+
+      try {
+        resetLongAudioState();
+
+        const chunks = splitLongTextIntoChunks(text, maxWords);
+        if (!chunks.length) {
+          throw new Error("Es konnten keine Audio-Blöcke erzeugt werden.");
+        }
+
+        longAudioSession = {
+          id: uid(),
+          stopped: false,
+          manualStop: false,
+          currentIndex: 0,
+          useEditorial,
+          chunks
+        };
+        longAudioShowFullPreview = false;
+
+        setLongStatus(
+          `Lang-Audio wird erzeugt ...\nTTS-Modell: ${TTS_MODEL}\nStimme: ${voiceInput.value}\nRedaktion: ${useEditorial ? `an (${LONG_AUDIO_EDITOR_MODEL})` : "aus"}\nBlöcke: ${chunks.length}`,
+          "info"
+        );
+        renderLongAudioSegments();
+
+        await generateLongChunkForSession(longAudioSession, 0);
+        if (!longAudioSession || longAudioSession.stopped) return;
+
+        updateLongMainAudioForChunk(longAudioSession, 0);
+
+        if (longAutoPlayCheckbox.checked) {
+          await playLongChunkSequentially(0, { autoPlay: true, resetTime: true });
+        } else {
+          setLongStatus("Erster Audio-Block erfolgreich erzeugt.\nWeitere Blöcke werden geladen.", "ok");
+        }
+
+        void startLongChunkGenerationQueue(longAudioSession, 1);
+      } catch (err) {
+        console.error(err);
+        setLongStatus("Fehler: " + err.message, "error");
+      } finally {
+        longGenerateBtn.disabled = false;
+      }
+    }
+
+    function clearLongAudioAll() {
+      longAudioTextInput.value = "";
+      updateLongStats();
+      resetLongAudioState();
+      saveState();
+      setLongStatus("Text und Lang-Audio wurden vollständig zurückgesetzt.", "ok");
     }
 
     function formatPomodoroTime(totalSeconds) {
@@ -1739,8 +2469,8 @@ Fehlerarten:
 Regeln:
 - "frage": formuliere die zugrunde liegende Prüfungsfrage oder den Kern des Problems klar und knapp.
 - "fehlerart": nur L1, L2, L3 oder L4.
-- "konzept_erklaert": erkläre das relevante Konzept medizinisch wissenschaftlich detailiert, klar und an der nutzeringabe orientiert.
-- "merksatz": ein kurzer, einprägsamer Merksatz der das konzept erklärt und fehler dieser art in zukunft vermiedet.
+- "konzept_erklaert": erkläre das relevante Konzept medizinisch wissenschaftlich detailiert, und inhaltlich an der nutzeringabe orientiert.
+- "merksatz": ein kurzer, einprägsamer Merksatz.
 - Keine Zusatztexte.
 - Gib ausschließlich valides JSON zurück in genau diesem Format:
 
@@ -2349,7 +3079,7 @@ Analysiere die Eingabe und liefere nur das JSON.
     });
 
     modeToggleBtn.addEventListener("click", () => {
-      appState.mode = appState.mode === "T" ? "K" : "T";
+      appState.mode = appState.mode === "T" ? "K" : (appState.mode === "K" ? "L" : "T");
       applyModeUI();
       saveState();
     });
@@ -2376,6 +3106,7 @@ Analysiere die Eingabe und liefere nur das JSON.
       apiKeyChatInput.value = "";
       apiKeyGpt54Input.value = "";
       apiKeyTranscribeInput.value = "";
+      apiKeyEditorialInput.value = "";
       saveState();
       updateApiBadge();
       setStatus("Alle API-Keys lokal gelöscht.", "ok");
@@ -2414,7 +3145,7 @@ Analysiere die Eingabe und liefere nur das JSON.
       el.addEventListener("change", () => { syncStartupToMain(); saveState(); });
     });
 
-    [baseUrlInput, apiKeyTtsInput, apiKeyChatInput, apiKeyGpt54Input, apiKeyTranscribeInput, chatModelInput, voiceInput, formatInput, speedInput, questionCountInput, saveSettingsCheckbox, autoPlayCheckbox, autoDownloadCheckbox, generateExpectedAnswersCheckbox, generateIntegrationQuestionsCheckbox, hideQuestionAudioButtonCheckbox, permanentSaveEnabled].forEach(el => {
+    [baseUrlInput, apiKeyTtsInput, apiKeyChatInput, apiKeyGpt54Input, apiKeyTranscribeInput, apiKeyEditorialInput, chatModelInput, voiceInput, formatInput, speedInput, questionCountInput, longChunkSizeInput, saveSettingsCheckbox, autoPlayCheckbox, autoDownloadCheckbox, longEnableEditorialCheckbox, longAutoPlayCheckbox, longAutoDownloadCheckbox, generateExpectedAnswersCheckbox, generateIntegrationQuestionsCheckbox, hideQuestionAudioButtonCheckbox, permanentSaveEnabled].forEach(el => {
       el.addEventListener("input", () => { syncMainToStartup(); saveState(); });
       el.addEventListener("change", () => { syncMainToStartup(); saveState(); });
     });
@@ -2431,11 +3162,17 @@ Analysiere die Eingabe und liefere nur das JSON.
       saveState();
     });
 
+    longAudioTextInput.addEventListener("input", () => {
+      updateLongStats();
+      saveState();
+    });
+
     kreuzenInput.addEventListener("input", saveState);
 
     speakBtn.addEventListener("click", generateSpeech);
     generateQuestionsBtn.addEventListener("click", generateQuestions);
     analyzeKreuzenBtn.addEventListener("click", analyzeKreuzenInput);
+    longGenerateBtn.addEventListener("click", generateLongAudio);
 
     pauseBtn.addEventListener("click", () => {
       if (!audioPlayer.paused) {
@@ -2463,6 +3200,70 @@ Analysiere die Eingabe und liefere nur das JSON.
       }
     });
 
+    longPauseBtn.addEventListener("click", () => {
+      if (!longAudioPlayer.paused) {
+        longAudioPlayer.pause();
+        pauseLongSegmentAudios();
+        if (longAudioSession) longAudioSession.manualStop = false;
+        setLongStatus("Wiedergabe pausiert.", "info");
+      }
+    });
+
+    longResumeBtn.addEventListener("click", async () => {
+      if (!longAudioSession || !longAudioSession.chunks.length) {
+        setLongStatus("Keine Audio-Blöcke vorhanden.", "error");
+        return;
+      }
+
+      longAudioSession.manualStop = false;
+      pauseLongSegmentAudios();
+
+      const currentChunk = longAudioSession.chunks[longAudioSession.currentIndex];
+      if (!currentChunk) {
+        setLongStatus("Kein aktueller Audio-Block verfügbar.", "error");
+        return;
+      }
+
+      if (currentChunk.status === "ready" && longAudioPlayer.src) {
+        try {
+          await longAudioPlayer.play();
+          setLongStatus(`Wiedergabe fortgesetzt.\nBlock ${longAudioSession.currentIndex + 1}/${longAudioSession.chunks.length}`, "ok");
+          return;
+        } catch {}
+      }
+
+      if (currentChunk.status === "ready") {
+        await playLongChunkSequentially(longAudioSession.currentIndex, { autoPlay: true, resetTime: false });
+        return;
+      }
+
+      waitForLongNextChunkAndPlay(longAudioSession.currentIndex);
+    });
+
+    longStopBtn.addEventListener("click", () => {
+      if (!longAudioSession || !longAudioSession.chunks.length) {
+        setLongStatus("Keine Audio-Blöcke vorhanden.", "error");
+        return;
+      }
+
+      clearLongAudioWaitTimer();
+      pauseLongSegmentAudios();
+      longAudioPlayer.pause();
+      longAudioSession.manualStop = true;
+      longAudioSession.currentIndex = 0;
+
+      const firstChunk = longAudioSession.chunks[0];
+      if (firstChunk && firstChunk.status === "ready") {
+        updateLongMainAudioForChunk(longAudioSession, 0);
+        longAudioPlayer.currentTime = 0;
+      } else {
+        longAudioPlayer.removeAttribute("src");
+        longAudioPlayer.load();
+      }
+
+      setLongStatus("Wiedergabe gestoppt und auf Anfang gesetzt.", "info");
+    });
+
     copyBtn.addEventListener("click", async () => {
       const text = textInput.value;
       if (!text) {
@@ -2477,7 +3278,22 @@ Analysiere die Eingabe und liefere nur das JSON.
       }
     });
 
+    longCopyBtn.addEventListener("click", async () => {
+      const text = longAudioTextInput.value;
+      if (!text) {
+        setLongStatus("Kein Text zum Kopieren vorhanden.", "error");
+        return;
+      }
+      try {
+        await navigator.clipboard.writeText(text);
+        setLongStatus("Text kopiert.", "ok");
+      } catch {
+        setLongStatus("Kopieren fehlgeschlagen.", "error");
+      }
+    });
+
     clearAllBtn.addEventListener("click", clearAll);
+    longClearBtn.addEventListener("click", clearLongAudioAll);
     clearQuestionsBtn.addEventListener("click", clearQuestionsOnly);
     exportBtn.addEventListener("click", exportQuestions);
 
@@ -2517,10 +3333,48 @@ Analysiere die Eingabe und liefere nur das JSON.
       }
     });
 
+    longFileInput.addEventListener("change", async (event) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      try {
+        const content = await file.text();
+        longAudioTextInput.value = content;
+        updateLongStats();
+        saveState();
+        setLongStatus(`Datei geladen: ${file.name}`, "ok");
+      } catch {
+        setLongStatus("Datei konnte nicht gelesen werden.", "error");
+      } finally {
+        longFileInput.value = "";
+      }
+    });
+
+    longTogglePreviewBtn.addEventListener("click", () => {
+      longAudioShowFullPreview = !longAudioShowFullPreview;
+      renderLongAudioSegments();
+      saveState();
+    });
+
+    longAudioPlayer.addEventListener("ended", () => {
+      if (!longAudioSession || longAudioSession.manualStop) return;
+      const nextIndex = longAudioSession.currentIndex + 1;
+      if (nextIndex >= longAudioSession.chunks.length) {
+        setLongStatus("Wiedergabe abgeschlossen.", "ok");
+        return;
+      }
+      waitForLongNextChunkAndPlay(nextIndex);
+    });
+
+    longAudioPlayer.addEventListener("play", () => {
+      pauseLongSegmentAudios();
+    });
+
     loadState();
     updateStats();
+    updateLongStats();
     renderQuestions();
     renderErrorBlocks();
+    renderLongAudioSegments();
     updateApiBadge();
     applyModeUI();
     resetPomodoro();
