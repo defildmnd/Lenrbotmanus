@@ -30,6 +30,8 @@
       --mode-t-soft:#ffedd5;
       --mode-k:#14b8a6;
       --mode-k-soft:#ccfbf1;
+      --integration:#7e22ce;
+      --integration-soft:#f5e8ff;
     }
 
     [data-theme="dark"] {
@@ -56,6 +58,8 @@
       --mode-t-soft:#4a2d14;
       --mode-k:#2dd4bf;
       --mode-k-soft:#123b39;
+      --integration:#d8b4fe;
+      --integration-soft:#3b2354;
     }
 
     *{ box-sizing:border-box; }
@@ -116,6 +120,8 @@
     .note{ font-size:11px; color:var(--muted); line-height:1.6; }
     .question-list, .error-block-list{ display:grid; gap:12px; margin-top:8px; }
     .question-card, .error-block{ border:1px solid var(--line); background:var(--card); border-radius:16px; overflow:hidden; box-shadow:0 6px 20px rgba(15,23,42,.05); }
+    .question-card.integration{ border-color:var(--integration); }
+    .question-card.integration .question-head{ background:var(--integration-soft); }
     [data-theme="dark"] .question-card, [data-theme="dark"] .error-block{ box-shadow:0 6px 20px rgba(0,0,0,.2); }
     .question-head, .error-block-head{ padding:12px 14px; display:flex; flex-direction:column; gap:10px; background:var(--card-2); border-bottom:1px solid var(--line); }
     .question-index, .error-index{ font-size:11px; color:var(--muted); margin-bottom:4px; }
@@ -124,6 +130,7 @@
     .question-actions button, .error-actions button{ min-width:auto; padding:8px 10px; font-size:12px; border-radius:12px; flex:1 1 auto; }
     .question-body, .error-body{ padding:12px 14px; display:grid; gap:10px; background:var(--card); }
     .score-pill{ display:inline-flex; align-items:center; gap:4px; font-weight:800; font-size:11px; border-radius:999px; padding:6px 10px; background:var(--info-bg); color:var(--info-text); border:1px solid var(--line); }
+    .integration-pill{ display:inline-flex; align-items:center; gap:4px; font-weight:800; font-size:11px; border-radius:999px; padding:6px 10px; background:var(--integration); color:#fff; border:1px solid transparent; }
     .level-pill{ display:inline-flex; align-items:center; gap:6px; font-weight:800; font-size:11px; border-radius:999px; padding:6px 10px; border:1px solid transparent; width:max-content; }
     .level-pill.l1{ background:#efe2ff; color:#6b21a8; }
     .level-pill.l2{ background:#dbeafe; color:#1d4ed8; }
@@ -133,6 +140,8 @@
     .feedback-title{ font-size:12px; font-weight:800; margin-bottom:6px; }
     .feedback ul{ margin:0; padding-left:16px; line-height:1.5; font-size:13px; }
     .feedback-grid, .error-field-grid{ display:grid; grid-template-columns:1fr; gap:10px; }
+    .answer-tools{ display:flex; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+    .mini-btn{ width:auto; min-width:70px; padding:8px 10px; border-radius:10px; font-size:12px; }
     .error-field{ border:1px solid var(--line); background:var(--card-2); border-radius:14px; padding:12px; }
     .error-field-name{ font-size:11px; font-weight:800; color:var(--muted); margin-bottom:6px; text-transform:uppercase; letter-spacing:.04em; }
     .error-field-value{ font-size:14px; line-height:1.6; white-space:pre-wrap; word-break:break-word; }
@@ -292,6 +301,13 @@
         </div>
       </div>
 
+      <div class="grid-2">
+        <div class="group">
+          <label for="startupApiKeyTranscribe">API Key · openai/gpt-4o-transcribe (optional Override)</label>
+          <input id="startupApiKeyTranscribe" type="password" placeholder="Optional eigener Key nur für openai/gpt-4o-transcribe" />
+        </div>
+      </div>
+
       <div class="btn-row">
         <button id="saveStartupBtn" class="success" type="button">Lokal speichern</button>
         <button id="hideStartupBtn" class="secondary" type="button">Startfeld einklappen</button>
@@ -337,6 +353,13 @@
                   <input id="apiKeyGpt54" type="password" placeholder="Optional eigener Key nur für openai/gpt-5.4" />
                 </div>
 
+                <div class="group">
+                  <label for="apiKeyTranscribe">API Key · openai/gpt-4o-transcribe (optional Override)</label>
+                  <input id="apiKeyTranscribe" type="password" placeholder="Optional eigener Key nur für openai/gpt-4o-transcribe" />
+                </div>
+              </div>
+
+              <div class="grid-2">
                 <div class="group">
                   <label for="chatModel">Chat-Modell</label>
                   <select id="chatModel">
@@ -397,6 +420,9 @@
                 <label><input type="checkbox" id="saveSettings" checked /> Einstellungen lokal speichern</label>
                 <label><input type="checkbox" id="autoPlay" checked /> Audio automatisch abspielen</label>
                 <label><input type="checkbox" id="autoDownload" /> Audio automatisch herunterladen</label>
+                <label><input type="checkbox" id="generateExpectedAnswers" /> Antworthorizont eingeben (Erwartungshorizont generieren)</label>
+                <label><input type="checkbox" id="generateIntegrationQuestions" /> Integrationsfragen generieren</label>
+                <label><input type="checkbox" id="hideQuestionAudioButton" /> Audio-Button bei Fragen ausblenden</label>
                 <label><input type="checkbox" id="permanentSaveEnabled" /> Permanente Speicherung aktivieren</label>
                 <button id="permanentSaveBtn" class="success" type="button">Permanent speichern</button>
               </div>
@@ -553,6 +579,7 @@
     const TTS_MODEL = "openai/gpt-4o-mini-tts-2025-12-15";
     const DEFAULT_CHAT_MODEL = "openai/gpt-4o-mini";
     const GPT54_MODEL = "openai/gpt-5.4";
+    const TRANSCRIBE_MODEL = "openai/gpt-4o-transcribe";
 
     const themeSwitch = document.getElementById("themeSwitch");
     const pomodoroBtn = document.getElementById("pomodoroBtn");
@@ -566,6 +593,7 @@
     const startupApiKeyTts = document.getElementById("startupApiKeyTts");
     const startupApiKeyChat = document.getElementById("startupApiKeyChat");
     const startupApiKeyGpt54 = document.getElementById("startupApiKeyGpt54");
+    const startupApiKeyTranscribe = document.getElementById("startupApiKeyTranscribe");
     const startupChatModel = document.getElementById("startupChatModel");
     const startupVoice = document.getElementById("startupVoice");
     const startupQuestionCount = document.getElementById("startupQuestionCount");
@@ -578,6 +606,7 @@
     const apiKeyTtsInput = document.getElementById("apiKeyTts");
     const apiKeyChatInput = document.getElementById("apiKeyChat");
     const apiKeyGpt54Input = document.getElementById("apiKeyGpt54");
+    const apiKeyTranscribeInput = document.getElementById("apiKeyTranscribe");
     const chatModelInput = document.getElementById("chatModel");
     const voiceInput = document.getElementById("voice");
     const formatInput = document.getElementById("format");
@@ -588,6 +617,9 @@
     const saveSettingsCheckbox = document.getElementById("saveSettings");
     const autoPlayCheckbox = document.getElementById("autoPlay");
     const autoDownloadCheckbox = document.getElementById("autoDownload");
+    const generateExpectedAnswersCheckbox = document.getElementById("generateExpectedAnswers");
+    const generateIntegrationQuestionsCheckbox = document.getElementById("generateIntegrationQuestions");
+    const hideQuestionAudioButtonCheckbox = document.getElementById("hideQuestionAudioButton");
     const permanentSaveEnabled = document.getElementById("permanentSaveEnabled");
     const permanentSaveBtn = document.getElementById("permanentSaveBtn");
     const toggleAdvancedBtn = document.getElementById("toggleAdvancedBtn");
@@ -653,6 +685,12 @@
     let pomodoroState = "paused";
     let pomodoroSeconds = POMODORO_START_SECONDS;
     let pomodoroInterval = null;
+    let mediaRecorder = null;
+    let mediaStream = null;
+    let recordingQuestionId = null;
+    let transcribingQuestionId = null;
+    let recordingChunks = [];
+    let cancelTranscriptionAfterStop = false;
 
     function setStatus(message, type = "info") {
       statusEl.textContent = message;
@@ -666,6 +704,47 @@
 
     function uid() {
       return Math.random().toString(36).slice(2) + Date.now().toString(36);
+    }
+
+    function clamp(value, min, max) {
+      return Math.max(min, Math.min(max, value));
+    }
+
+    function normalizeQuestionItem(item, idx = 0) {
+      const safeItem = item || {};
+      const questionText = String(safeItem.question ?? "").trim();
+      if (!questionText) return null;
+
+      const rawResult = safeItem.result && typeof safeItem.result === "object" ? safeItem.result : null;
+      const expectedAnswer = String(safeItem.expectedAnswer ?? "").trim();
+
+      return {
+        id: String(safeItem.id || uid()),
+        question: questionText,
+        answer: String(safeItem.answer ?? ""),
+        result: rawResult ? {
+          score: clamp(Number(rawResult.score) || 0, 0, 100),
+          richtig: Array.isArray(rawResult.richtig) ? rawResult.richtig.slice(0, 3).map(String) : [],
+          falsch_fehlt: Array.isArray(rawResult.falsch_fehlt) ? rawResult.falsch_fehlt.slice(0, 3).map(String) : []
+        } : null,
+        open: typeof safeItem.open === "boolean" ? safeItem.open : idx === 0,
+        expectedAnswer,
+        expectedOpen: safeItem.expectedOpen === true,
+        questionType: safeItem.questionType === "integration" ? "integration" : "standard"
+      };
+    }
+
+    function makeQuestionRecord(questionText, idx = 0, options = {}) {
+      return normalizeQuestionItem({
+        id: uid(),
+        question: String(questionText || "").trim(),
+        answer: String(options.answer || ""),
+        result: options.result || null,
+        open: options.open ?? idx === 0,
+        expectedAnswer: String(options.expectedAnswer || "").trim(),
+        expectedOpen: false,
+        questionType: options.questionType === "integration" ? "integration" : "standard"
+      }, idx);
     }
 
     function getCurrentChatModel() {
@@ -690,6 +769,16 @@
       return "Standard-Chat-Key";
     }
 
+    function getActiveTranscribeApiKey() {
+      const transcribeKey = apiKeyTranscribeInput.value.trim();
+      return transcribeKey || getActiveChatApiKey();
+    }
+
+    function getResolvedTranscribeKeyLabel() {
+      if (apiKeyTranscribeInput.value.trim()) return "Transcribe-Override-Key";
+      return getResolvedChatKeyLabel();
+    }
+
     function updateStats() {
       const text = textInput.value || "";
       const words = text.trim() ? text.trim().split(/\s+/).length : 0;
@@ -703,14 +792,16 @@
       const hasTts = !!apiKeyTtsInput.value.trim();
       const hasStandardChat = !!apiKeyChatInput.value.trim();
       const hasGpt54 = !!apiKeyGpt54Input.value.trim();
+      const hasTranscribe = !!apiKeyTranscribeInput.value.trim();
       const activeChatKey = !!getActiveChatApiKey();
+      const activeTranscribeKey = !!getActiveTranscribeApiKey();
       const selectedModel = getCurrentChatModel();
 
-      if (hasTts && activeChatKey) {
-        apiStateBadge.textContent = `Bereit · TTS + ${selectedModel}`;
+      if (hasTts && activeChatKey && activeTranscribeKey) {
+        apiStateBadge.textContent = `Bereit · TTS + ${selectedModel} + ${TRANSCRIBE_MODEL}`;
       } else {
-        const count = [hasTts, hasStandardChat, hasGpt54].filter(Boolean).length;
-        apiStateBadge.textContent = `Gesetzte Keys: ${count}/3 · Modell: ${selectedModel}`;
+        const count = [hasTts, hasStandardChat, hasGpt54, hasTranscribe].filter(Boolean).length;
+        apiStateBadge.textContent = `Gesetzte Keys: ${count}/4 · Modell: ${selectedModel}`;
       }
     }
 
@@ -719,6 +810,7 @@
       apiKeyTtsInput.value = startupApiKeyTts.value;
       apiKeyChatInput.value = startupApiKeyChat.value;
       apiKeyGpt54Input.value = startupApiKeyGpt54.value;
+      apiKeyTranscribeInput.value = startupApiKeyTranscribe.value;
       chatModelInput.value = startupChatModel.value || DEFAULT_CHAT_MODEL;
       voiceInput.value = startupVoice.value;
       questionCountInput.value = startupQuestionCount.value;
@@ -730,6 +822,7 @@
       startupApiKeyTts.value = apiKeyTtsInput.value;
       startupApiKeyChat.value = apiKeyChatInput.value;
       startupApiKeyGpt54.value = apiKeyGpt54Input.value;
+      startupApiKeyTranscribe.value = apiKeyTranscribeInput.value;
       startupChatModel.value = chatModelInput.value || DEFAULT_CHAT_MODEL;
       startupVoice.value = voiceInput.value;
       startupQuestionCount.value = questionCountInput.value;
@@ -752,6 +845,7 @@
         apiKeyTts: apiKeyTtsInput.value,
         apiKeyChat: apiKeyChatInput.value,
         apiKeyGpt54: apiKeyGpt54Input.value,
+        apiKeyTranscribe: apiKeyTranscribeInput.value,
         chatModel: chatModelInput.value || DEFAULT_CHAT_MODEL,
         voice: voiceInput.value,
         format: formatInput.value,
@@ -761,6 +855,9 @@
         kreuzenInput: kreuzenInput.value,
         autoPlay: autoPlayCheckbox.checked,
         autoDownload: autoDownloadCheckbox.checked,
+        generateExpectedAnswers: generateExpectedAnswersCheckbox.checked,
+        generateIntegrationQuestions: generateIntegrationQuestionsCheckbox.checked,
+        hideQuestionAudioButton: hideQuestionAudioButtonCheckbox.checked,
         saveSettings: saveSettingsCheckbox.checked,
         permanentSaveEnabled: permanentSaveEnabled.checked,
         advancedOpen: !advancedPanel.classList.contains("collapsed"),
@@ -800,6 +897,7 @@
         apiKeyTtsInput.value = data.apiKeyTts || "";
         apiKeyChatInput.value = data.apiKeyChat || "";
         apiKeyGpt54Input.value = data.apiKeyGpt54 || "";
+        apiKeyTranscribeInput.value = data.apiKeyTranscribe || "";
         chatModelInput.value = data.chatModel || DEFAULT_CHAT_MODEL;
         voiceInput.value = data.voice || "alloy";
         formatInput.value = data.format || "mp3";
@@ -810,10 +908,15 @@
 
         autoPlayCheckbox.checked = data.autoPlay !== false;
         autoDownloadCheckbox.checked = data.autoDownload === true;
+        generateExpectedAnswersCheckbox.checked = data.generateExpectedAnswers === true;
+        generateIntegrationQuestionsCheckbox.checked = data.generateIntegrationQuestions === true;
+        hideQuestionAudioButtonCheckbox.checked = data.hideQuestionAudioButton === true;
         saveSettingsCheckbox.checked = data.saveSettings !== false;
         permanentSaveEnabled.checked = data.permanentSaveEnabled === true;
 
-        appState.questions = Array.isArray(data.questions) ? data.questions : [];
+        appState.questions = Array.isArray(data.questions)
+          ? data.questions.map((item, idx) => normalizeQuestionItem(item, idx)).filter(Boolean)
+          : [];
         appState.errorBlocks = Array.isArray(data.errorBlocks) ? data.errorBlocks : [];
         appState.mode = data.mode === "K" ? "K" : "T";
 
@@ -1065,30 +1168,12 @@
       }
     }
 
-    async function generateQuestions() {
-      const text = textInput.value.trim();
-      const chatModel = getCurrentChatModel();
-
-      if (!getActiveChatApiKey()) {
-        setStatus(`Bitte den API-Key für ${chatModel} setzen.`, "error");
-        return;
-      }
-      if (!text) {
-        setStatus("Bitte zuerst einen Originaltext eingeben.", "error");
-        return;
-      }
-
-      generateQuestionsBtn.disabled = true;
-      setStatus(`Fragen werden generiert ...\nChat-Modell: ${chatModel}\nKey-Quelle: ${getResolvedChatKeyLabel()}`, "info");
-
-      const countRaw = questionCountInput.value.trim();
-      const count = countRaw ? Number(countRaw) : null;
-
+    async function generateBaseQuestionsOnly(originalText, count) {
       const systemPrompt = `
 Du bist ein extrem zeiteffizienter medizinischer Prüfungs-Coach.
 Erzeuge aus medizinischem Text kurze, präzise Active-Recall-Fragen.
 Regeln:
-- Maximal 1–2 Sätze pro Frage.
+- Maximal 1-2 Sätze pro Frage.
 - Keine langen Erklärungen.
 - Kein Lehrbuchstil.
 - Keine Wiederholung des Originaltexts.
@@ -1107,36 +1192,210 @@ Keine zusätzlichen Sätze.
 
       const userPrompt = `
 Originaltext:
-"""${text}"""
+"""${originalText}"""
 
 Gewünschte Anzahl Fragen: ${count ? count : "nicht definiert, entscheide selbst"}
 
 Erzeuge nur die Fragen als JSON.
       `.trim();
 
-      try {
-        const raw = await fetchJsonChat({ systemPrompt, userPrompt });
-        const parsed = tryParseJSON(raw);
+      const raw = await fetchJsonChat({ systemPrompt, userPrompt });
+      const parsed = tryParseJSON(raw);
+      if (!parsed || !Array.isArray(parsed.questions)) {
+        throw new Error("Die Fragen konnten nicht als JSON gelesen werden.");
+      }
 
-        if (!parsed || !Array.isArray(parsed.questions)) {
-          throw new Error("Die Fragen konnten nicht als JSON gelesen werden.");
+      return parsed.questions.map(q => String(q).trim()).filter(Boolean);
+    }
+
+    async function generateExpectedAnswersForQuestions(questions, originalText) {
+      if (!questions.length) return questions;
+
+      const numberedQuestions = questions.map((q, idx) => `${idx + 1}. ${q.question}`).join("\n");
+
+      const systemPrompt = `
+Du bist ein medizinischer Prüfungs-Coach.
+Erstelle für jede Frage einen kompakten Erwartungshorizont (1-4 Kernpunkte).
+Regeln:
+- Präzise, prüfungsorientiert, ohne Fließtext.
+- Jede Antwort muss nur die notwendigen Kerninhalte enthalten.
+- Reihenfolge muss exakt der Frage-Reihenfolge entsprechen.
+Gib ausschließlich valides JSON zurück:
+{
+  "expected_answers": [
+    "Erwartung zu Frage 1",
+    "Erwartung zu Frage 2"
+  ]
+}
+      `.trim();
+
+      const userPrompt = `
+Originaltext:
+"""${originalText}"""
+
+Fragen:
+${numberedQuestions}
+
+Erstelle zu jeder Frage den Erwartungshorizont.
+      `.trim();
+
+      const raw = await fetchJsonChat({ systemPrompt, userPrompt });
+      const parsed = tryParseJSON(raw);
+
+      let expectedAnswers = [];
+      if (parsed && Array.isArray(parsed.expected_answers)) {
+        expectedAnswers = parsed.expected_answers.map(item => String(item || "").trim());
+      } else if (parsed && Array.isArray(parsed.erwartungshorizonte)) {
+        expectedAnswers = parsed.erwartungshorizonte.map(item => {
+          if (typeof item === "string") return item.trim();
+          return String(item?.expected_answer ?? item?.erwartungshorizont ?? "").trim();
+        });
+      }
+
+      if (!expectedAnswers.length) {
+        throw new Error("Erwartungshorizonte konnten nicht als JSON gelesen werden.");
+      }
+
+      return questions.map((question, idx) => normalizeQuestionItem({
+        ...question,
+        expectedAnswer: expectedAnswers[idx] || "",
+        expectedOpen: false
+      }, idx)).filter(Boolean);
+    }
+
+    async function generateIntegrationQuestions(questions, originalText) {
+      if (!questions.length) return [];
+
+      const contextLines = questions.map((q, idx) => {
+        const baseLine = `${idx + 1}. Frage: ${q.question}`;
+        if (q.expectedAnswer) return `${baseLine}\n   Erwartungshorizont: ${q.expectedAnswer}`;
+        return baseLine;
+      }).join("\n");
+
+      const systemPrompt = `
+Du bist ein medizinischer Prüfungs-Coach.
+Erzeuge Integrationsfragen, die mehrere vorherige Fragen sinnvoll bündeln.
+Regeln:
+- Anzahl fluid bestimmen (typisch 1 bis 5), abhängig von Themenbreite.
+- Jede Integrationsfrage verbindet mehrere Einzelaspekte.
+- Jede Integrationsfrage erhält einen eigenen kompakten Erwartungshorizont.
+- Keine Dopplungen.
+Gib ausschließlich valides JSON zurück:
+{
+  "integration_questions": [
+    {
+      "question": "Integrationsfrage ...",
+      "expected_answer": "Erwartungshorizont ..."
+    }
+  ]
+}
+      `.trim();
+
+      const userPrompt = `
+Originaltext:
+"""${originalText}"""
+
+Vorhandene Fragen und ggf. Erwartungshorizonte:
+${contextLines}
+
+Erzeuge daraus Integrationsfragen.
+      `.trim();
+
+      const raw = await fetchJsonChat({ systemPrompt, userPrompt });
+      const parsed = tryParseJSON(raw);
+      const items = parsed && Array.isArray(parsed.integration_questions) ? parsed.integration_questions : [];
+      if (!items.length) {
+        throw new Error("Integrationsfragen konnten nicht als JSON gelesen werden.");
+      }
+
+      let integrationQuestions = items
+        .map((item, idx) => makeQuestionRecord(item?.question, idx, {
+          open: false,
+          questionType: "integration",
+          expectedAnswer: String(item?.expected_answer ?? item?.erwartungshorizont ?? "").trim()
+        }))
+        .filter(Boolean);
+
+      if (integrationQuestions.some(q => !q.expectedAnswer)) {
+        const enriched = await generateExpectedAnswersForQuestions(integrationQuestions, originalText);
+        integrationQuestions = integrationQuestions.map((q, idx) => normalizeQuestionItem({
+          ...q,
+          expectedAnswer: enriched[idx]?.expectedAnswer || q.expectedAnswer,
+          questionType: "integration",
+          open: false
+        }, idx)).filter(Boolean);
+      }
+
+      return integrationQuestions.map((item, idx) => normalizeQuestionItem({
+        ...item,
+        questionType: "integration",
+        open: false
+      }, idx)).filter(Boolean);
+    }
+
+    async function generateQuestions() {
+      const text = textInput.value.trim();
+      const chatModel = getCurrentChatModel();
+
+      if (!getActiveChatApiKey()) {
+        setStatus(`Bitte den API-Key für ${chatModel} setzen.`, "error");
+        return;
+      }
+      if (!text) {
+        setStatus("Bitte zuerst einen Originaltext eingeben.", "error");
+        return;
+      }
+
+      const countRaw = questionCountInput.value.trim();
+      const count = countRaw ? Number(countRaw) : null;
+      if (countRaw && (!Number.isFinite(count) || count < 1 || count > 30)) {
+        setStatus("Die Anzahl Fragen muss zwischen 1 und 30 liegen.", "error");
+        return;
+      }
+
+      const withExpectedAnswers = generateExpectedAnswersCheckbox.checked;
+      const withIntegrationQuestions = generateIntegrationQuestionsCheckbox.checked;
+      const totalSteps = 1 + Number(withExpectedAnswers) + Number(withIntegrationQuestions);
+      let step = 1;
+
+      generateQuestionsBtn.disabled = true;
+      setStatus(`Schritt ${step}/${totalSteps}: Fragen werden generiert ...\nChat-Modell: ${chatModel}\nKey-Quelle: ${getResolvedChatKeyLabel()}`, "info");
+
+      try {
+        const rawQuestions = await generateBaseQuestionsOnly(text, count);
+        let newQuestions = rawQuestions
+          .map((q, idx) => makeQuestionRecord(q, idx, { open: idx === 0 }))
+          .filter(Boolean);
+
+        if (!newQuestions.length) {
+          throw new Error("Es konnten keine Fragen aus dem Text erzeugt werden.");
         }
 
-        const newQuestions = parsed.questions
-          .map(q => String(q).trim())
-          .filter(Boolean)
-          .map((q, idx) => ({
-            id: uid(),
-            question: q,
-            answer: "",
-            result: null,
-            open: idx === 0
-          }));
+        if (withExpectedAnswers) {
+          step += 1;
+          setStatus(`Schritt ${step}/${totalSteps}: Erwartungshorizonte werden generiert ...`, "info");
+          newQuestions = await generateExpectedAnswersForQuestions(newQuestions, text);
+        }
 
-        appState.questions = newQuestions;
+        let integrationQuestions = [];
+        if (withIntegrationQuestions) {
+          step += 1;
+          setStatus(`Schritt ${step}/${totalSteps}: Integrationsfragen werden generiert ...`, "info");
+          integrationQuestions = await generateIntegrationQuestions(newQuestions, text);
+        }
+
+        appState.questions = [...newQuestions, ...integrationQuestions]
+          .map((item, idx) => normalizeQuestionItem(item, idx))
+          .filter(Boolean);
+
         saveState();
         renderQuestions();
-        setStatus(`Fragen erfolgreich generiert: ${newQuestions.length}\nChat-Modell: ${chatModel}`, "ok");
+
+        const expectedCount = appState.questions.filter(q => q.expectedAnswer).length;
+        setStatus(
+          `Fragen erfolgreich generiert: ${newQuestions.length}\nIntegrationsfragen: ${integrationQuestions.length}\nErwartungshorizonte: ${expectedCount}\nChat-Modell: ${chatModel}`,
+          "ok"
+        );
       } catch (err) {
         console.error(err);
         setStatus("Fehler bei der Fragengenerierung: " + err.message, "error");
@@ -1145,17 +1404,226 @@ Erzeuge nur die Fragen als JSON.
       }
     }
 
+    function isSpeechInputSupported() {
+      return !!(navigator.mediaDevices?.getUserMedia && typeof MediaRecorder !== "undefined");
+    }
+
+    function getRecordingMimeType() {
+      const options = [
+        "audio/webm;codecs=opus",
+        "audio/webm",
+        "audio/mp4",
+        "audio/mpeg"
+      ];
+      for (const type of options) {
+        if (MediaRecorder.isTypeSupported && MediaRecorder.isTypeSupported(type)) {
+          return type;
+        }
+      }
+      return "";
+    }
+
+    function releaseRecordingResources() {
+      if (mediaStream) {
+        mediaStream.getTracks().forEach(track => track.stop());
+      }
+      mediaStream = null;
+      mediaRecorder = null;
+      recordingChunks = [];
+    }
+
+    async function transcribeRecordedAnswer(questionId, audioBlob) {
+      const apiKey = getActiveTranscribeApiKey();
+      const baseUrl = baseUrlInput.value.trim().replace(/\/+$/, "");
+
+      if (!apiKey) {
+        throw new Error(`Bitte den API-Key für ${TRANSCRIBE_MODEL} setzen.`);
+      }
+
+      transcribingQuestionId = questionId;
+      renderQuestions();
+
+      try {
+        const formData = new FormData();
+        const extension = audioBlob.type.includes("mp4") ? "m4a" : "webm";
+        formData.append("model", TRANSCRIBE_MODEL);
+        formData.append("file", audioBlob, `answer_${Date.now()}.${extension}`);
+        formData.append("prompt", "Transkribiere die medizinische Antwort präzise auf Deutsch.");
+
+        const response = await fetch(`${baseUrl}/v1/audio/transcriptions`, {
+          method: "POST",
+          headers: {
+            "Authorization": `Bearer ${apiKey}`
+          },
+          body: formData
+        });
+
+        if (!response.ok) {
+          let errorMessage = `HTTP ${response.status}`;
+          try {
+            const err = await response.json();
+            errorMessage = JSON.stringify(err, null, 2);
+          } catch {
+            errorMessage = await response.text();
+          }
+          throw new Error(errorMessage);
+        }
+
+        const data = await response.json();
+        const transcript = String(data?.text ?? "").trim();
+        if (!transcript) {
+          throw new Error("Die Transkription war leer.");
+        }
+
+        const question = appState.questions.find(q => q.id === questionId);
+        if (!question) {
+          throw new Error("Die zugehörige Frage wurde nicht gefunden.");
+        }
+
+        question.answer = question.answer?.trim() ? `${question.answer.trim()}\n${transcript}` : transcript;
+        saveState();
+        renderQuestions();
+        setStatus(`Transkription abgeschlossen.\nModell: ${TRANSCRIBE_MODEL}\nKey-Quelle: ${getResolvedTranscribeKeyLabel()}`, "ok");
+      } finally {
+        transcribingQuestionId = null;
+        renderQuestions();
+      }
+    }
+
+    async function startQuestionRecording(questionId) {
+      if (!isSpeechInputSupported()) {
+        setStatus("Audioeingabe wird von diesem Browser nicht unterstützt.", "error");
+        return;
+      }
+      if (!getActiveTranscribeApiKey()) {
+        setStatus(`Bitte API-Key für ${TRANSCRIBE_MODEL} setzen (oder Chat-Key als Fallback).`, "error");
+        return;
+      }
+      if (!window.isSecureContext) {
+        setStatus("Mikrofonzugriff ist nur in sicherem Kontext möglich (https oder localhost).", "error");
+        return;
+      }
+      if (recordingQuestionId || transcribingQuestionId) {
+        setStatus("Bitte zuerst die laufende Audioaktion abschließen.", "error");
+        return;
+      }
+
+      try {
+        mediaStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        recordingChunks = [];
+
+        const mimeType = getRecordingMimeType();
+        mediaRecorder = mimeType ? new MediaRecorder(mediaStream, { mimeType }) : new MediaRecorder(mediaStream);
+        recordingQuestionId = questionId;
+
+        mediaRecorder.addEventListener("dataavailable", event => {
+          if (event.data?.size) {
+            recordingChunks.push(event.data);
+          }
+        });
+
+        mediaRecorder.addEventListener("stop", async () => {
+          const localQuestionId = recordingQuestionId;
+          recordingQuestionId = null;
+          renderQuestions();
+
+          const recorderMimeType = mediaRecorder?.mimeType || mimeType || "audio/webm";
+          const blob = new Blob(recordingChunks, { type: recorderMimeType });
+          releaseRecordingResources();
+
+          if (cancelTranscriptionAfterStop) {
+            cancelTranscriptionAfterStop = false;
+            setStatus("Audioaufnahme verworfen.", "info");
+            return;
+          }
+
+          if (!localQuestionId) return;
+          if (!blob.size) {
+            setStatus("Keine Audiodaten erkannt. Bitte erneut aufnehmen.", "error");
+            return;
+          }
+
+          try {
+            setStatus(`Audio wird transkribiert ...\nModell: ${TRANSCRIBE_MODEL}\nKey-Quelle: ${getResolvedTranscribeKeyLabel()}`, "info");
+            await transcribeRecordedAnswer(localQuestionId, blob);
+          } catch (err) {
+            console.error(err);
+            setStatus("Fehler bei der Transkription: " + err.message, "error");
+          }
+        });
+
+        mediaRecorder.addEventListener("error", event => {
+          console.error(event);
+          recordingQuestionId = null;
+          releaseRecordingResources();
+          renderQuestions();
+          setStatus("Aufnahmefehler. Bitte erneut versuchen.", "error");
+        });
+
+        mediaRecorder.start();
+        renderQuestions();
+        setStatus("Aufnahme läuft. Erneut auf Audio klicken, um zu stoppen.", "info");
+      } catch (err) {
+        console.error(err);
+        releaseRecordingResources();
+        recordingQuestionId = null;
+        renderQuestions();
+        if (err?.name === "NotAllowedError" || err?.name === "PermissionDeniedError") {
+          setStatus(
+            "Mikrofonzugriff blockiert. Bitte Mikrofon im Browser/OS erlauben und die Seite neu laden. Bei Dateiaufruf (file://) bitte über https/localhost öffnen.",
+            "error"
+          );
+          return;
+        }
+        if (err?.name === "NotFoundError" || err?.name === "DevicesNotFoundError") {
+          setStatus("Kein Mikrofon gefunden. Bitte ein Mikrofon verbinden und erneut versuchen.", "error");
+          return;
+        }
+        setStatus("Mikrofonzugriff fehlgeschlagen: " + (err?.message || "Unbekannter Fehler"), "error");
+      }
+    }
+
+    function stopQuestionRecording() {
+      if (!mediaRecorder || mediaRecorder.state === "inactive") return;
+      mediaRecorder.stop();
+      setStatus("Aufnahme gestoppt. Transkription startet ...", "info");
+    }
+
+    function discardQuestionRecording() {
+      if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        cancelTranscriptionAfterStop = true;
+        mediaRecorder.stop();
+        return;
+      }
+      recordingQuestionId = null;
+      transcribingQuestionId = null;
+      releaseRecordingResources();
+      renderQuestions();
+    }
+
+    async function toggleQuestionRecording(questionId) {
+      if (recordingQuestionId === questionId) {
+        stopQuestionRecording();
+        return;
+      }
+      await startQuestionRecording(questionId);
+    }
+
     async function evaluateQuestion(questionId) {
       const question = appState.questions.find(q => q.id === questionId);
       const originalText = textInput.value.trim();
       const chatModel = getCurrentChatModel();
+      const expectedAnswer = String(question?.expectedAnswer || "").trim();
+      const useExpectedAnswer = !!expectedAnswer;
+      const referenceText = useExpectedAnswer ? expectedAnswer : originalText;
+      const referenceLabel = useExpectedAnswer ? "Erwartungshorizont" : "Originaltext";
 
       if (!getActiveChatApiKey()) {
         setStatus(`Bitte den API-Key für ${chatModel} setzen.`, "error");
         return;
       }
-      if (!originalText) {
-        setStatus("Es fehlt der Originaltext zum Abgleich.", "error");
+      if (!referenceText) {
+        setStatus("Es fehlt eine Referenz für den Abgleich (Originaltext oder Erwartungshorizont).", "error");
         return;
       }
       if (!question) return;
@@ -1188,8 +1656,8 @@ Gib ausschließlich valides JSON zurück in genau diesem Format:
       `.trim();
 
       const userPrompt = `
-Originaltext:
-"""${originalText}"""
+${referenceLabel}:
+"""${referenceText}"""
 
 Frage:
 """${question.question}"""
@@ -1197,7 +1665,7 @@ Frage:
 Nutzerantwort:
 """${question.answer}"""
 
-Bewerte die Antwort ausschließlich anhand des Originaltexts.
+Bewerte die Antwort ausschließlich anhand des ${referenceLabel}.
       `.trim();
 
       try {
@@ -1209,7 +1677,7 @@ Bewerte die Antwort ausschließlich anhand des Originaltexts.
         }
 
         question.result = {
-          score: Math.max(0, Math.min(100, Number(parsed.score) || 0)),
+          score: clamp(Number(parsed.score) || 0, 0, 100),
           richtig: Array.isArray(parsed.richtig) ? parsed.richtig.slice(0, 3).map(String) : [],
           falsch_fehlt: Array.isArray(parsed.falsch_fehlt) ? parsed.falsch_fehlt.slice(0, 3).map(String) : []
         };
@@ -1327,6 +1795,9 @@ Analysiere die Eingabe und liefere nur das JSON.
     }
 
     function deleteQuestion(questionId) {
+      if (recordingQuestionId === questionId || transcribingQuestionId === questionId) {
+        discardQuestionRecording();
+      }
       appState.questions = appState.questions.filter(q => q.id !== questionId);
       saveState();
       renderQuestions();
@@ -1337,6 +1808,14 @@ Analysiere die Eingabe und liefere nur das JSON.
       const question = appState.questions.find(q => q.id === questionId);
       if (!question) return;
       question.open = !question.open;
+      saveState();
+      renderQuestions();
+    }
+
+    function toggleExpectedAnswer(questionId) {
+      const question = appState.questions.find(q => q.id === questionId);
+      if (!question || !question.expectedAnswer) return;
+      question.expectedOpen = !question.expectedOpen;
       saveState();
       renderQuestions();
     }
@@ -1357,19 +1836,45 @@ Analysiere die Eingabe und liefere nur das JSON.
       }
 
       emptyQuestions.classList.add("hidden");
+      const speechSupported = isSpeechInputSupported();
+      const showQuestionAudioButton = !hideQuestionAudioButtonCheckbox.checked;
+      let regularCounter = 0;
+      let integrationCounter = 0;
 
       appState.questions.forEach((q, idx) => {
         const result = q.result || null;
+        const isIntegration = q.questionType === "integration";
+        const hasExpectedAnswer = !!String(q.expectedAnswer || "").trim();
+        const isRecording = recordingQuestionId === q.id;
+        const isTranscribing = transcribingQuestionId === q.id;
+
+        if (isIntegration) integrationCounter += 1;
+        else regularCounter += 1;
+
+        const questionIndexLabel = isIntegration
+          ? `Integrationsfrage ${integrationCounter}`
+          : `Frage ${regularCounter}`;
+
+        const isBusyWithOtherQuestion = (
+          (recordingQuestionId && recordingQuestionId !== q.id) ||
+          (transcribingQuestionId && transcribingQuestionId !== q.id)
+        );
+
+        const audioDisabled = !speechSupported || isTranscribing || isBusyWithOtherQuestion;
+        const audioButtonLabel = isRecording ? "Stop" : (isTranscribing ? "..." : "Audio");
+        const audioButtonClass = isRecording ? "danger" : "ghost";
+        const showToolsRow = showQuestionAudioButton || hasExpectedAnswer;
         const card = document.createElement("div");
-        card.className = "question-card";
+        card.className = `question-card ${isIntegration ? "integration" : ""}`.trim();
 
         card.innerHTML = `
           <div class="question-head">
             <div style="flex:1 1 auto;">
-              <div class="question-index">Frage ${idx + 1}</div>
+              <div class="question-index">${questionIndexLabel}</div>
               <div class="question-text">${escapeHtml(q.question)}</div>
             </div>
             <div class="question-actions">
+              ${isIntegration ? `<div class="integration-pill">Integration</div>` : ""}
               ${result ? `<div class="score-pill">Score: ${result.score}%</div>` : ""}
               <button class="ghost" type="button" data-toggle-id="${q.id}">
                 ${q.open ? "Einklappen" : "Öffnen"}
@@ -1381,8 +1886,40 @@ Analysiere die Eingabe und liefere nur das JSON.
           <div class="question-body ${q.open ? "" : "hidden"}">
             <div>
               <label for="answer-${q.id}">Deine Antwort</label>
+              ${showToolsRow ? `
+                <div class="answer-tools">
+                  ${showQuestionAudioButton ? `
+                    <button
+                      class="${audioButtonClass} mini-btn"
+                      type="button"
+                      data-record-id="${q.id}"
+                      ${audioDisabled ? "disabled" : ""}
+                      title="${speechSupported ? "Audioaufnahme starten/stoppen" : "Browser unterstützt keine Audioaufnahme"}"
+                    >
+                      ${audioButtonLabel}
+                    </button>
+                  ` : ""}
+                  ${hasExpectedAnswer ? `
+                    <button
+                      class="ghost mini-btn"
+                      type="button"
+                      data-hint-id="${q.id}"
+                      title="Erwartungshorizont anzeigen oder ausblenden"
+                    >
+                      ?
+                    </button>
+                  ` : ""}
+                </div>
+              ` : ""}
               <textarea id="answer-${q.id}" class="small-textarea" placeholder="Hier deine Antwort eingeben...">${escapeHtml(q.answer || "")}</textarea>
             </div>
+
+            ${hasExpectedAnswer ? `
+              <div class="feedback ${q.expectedOpen ? "" : "hidden"}">
+                <div class="feedback-title">Erwartungshorizont</div>
+                <div class="error-field-value">${escapeHtml(q.expectedAnswer)}</div>
+              </div>
+            ` : ""}
 
             <div class="btn-row">
               <button class="blue" type="button" data-eval-id="${q.id}">Senden / Bewerten</button>
@@ -1418,9 +1955,17 @@ Analysiere die Eingabe und liefere nur das JSON.
         btn.addEventListener("click", () => deleteQuestion(btn.dataset.deleteId));
       });
 
+      questionsContainer.querySelectorAll("[data-hint-id]").forEach(btn => {
+        btn.addEventListener("click", () => toggleExpectedAnswer(btn.dataset.hintId));
+      });
+
       questionsContainer.querySelectorAll("textarea[id^='answer-']").forEach(textarea => {
         const questionId = textarea.id.replace("answer-", "");
         textarea.addEventListener("input", (e) => updateQuestionAnswer(questionId, e.target.value));
+      });
+
+      questionsContainer.querySelectorAll("[data-record-id]").forEach(btn => {
+        btn.addEventListener("click", () => { void toggleQuestionRecording(btn.dataset.recordId); });
       });
 
       questionsContainer.querySelectorAll("[data-eval-id]").forEach(btn => {
@@ -1606,7 +2151,13 @@ Analysiere die Eingabe und liefere nur das JSON.
       lines.push("");
 
       appState.questions.forEach((q, i) => {
-        lines.push(`Frage ${i + 1}: ${q.question}`);
+        const typeLabel = q.questionType === "integration" ? "Integrationsfrage" : "Frage";
+        lines.push(`${typeLabel} ${i + 1}: ${q.question}`);
+        if (q.expectedAnswer) {
+          lines.push(`Erwartungshorizont: ${q.expectedAnswer}`);
+        } else {
+          lines.push("Erwartungshorizont: —");
+        }
         lines.push(`Antwort: ${q.answer?.trim() || "—"}`);
         if (q.result) {
           lines.push(`Score: ${q.result.score}%`);
@@ -1724,6 +2275,7 @@ Analysiere die Eingabe und liefere nur das JSON.
     }
 
     function clearQuestionsOnly() {
+      discardQuestionRecording();
       appState.questions = [];
       saveState();
       renderQuestions();
@@ -1731,6 +2283,7 @@ Analysiere die Eingabe und liefere nur das JSON.
     }
 
     function clearAll() {
+      discardQuestionRecording();
       textInput.value = "";
       questionCountInput.value = "";
       appState.questions = [];
@@ -1801,9 +2354,11 @@ Analysiere die Eingabe und liefere nur das JSON.
       startupApiKeyTts.value = "";
       startupApiKeyChat.value = "";
       startupApiKeyGpt54.value = "";
+      startupApiKeyTranscribe.value = "";
       apiKeyTtsInput.value = "";
       apiKeyChatInput.value = "";
       apiKeyGpt54Input.value = "";
+      apiKeyTranscribeInput.value = "";
       saveState();
       updateApiBadge();
       setStatus("Alle API-Keys lokal gelöscht.", "ok");
@@ -1837,14 +2392,21 @@ Analysiere die Eingabe und liefere nur das JSON.
       }
     });
 
-    [startupBaseUrl, startupApiKeyTts, startupApiKeyChat, startupApiKeyGpt54, startupChatModel, startupVoice, startupQuestionCount].forEach(el => {
+    [startupBaseUrl, startupApiKeyTts, startupApiKeyChat, startupApiKeyGpt54, startupApiKeyTranscribe, startupChatModel, startupVoice, startupQuestionCount].forEach(el => {
       el.addEventListener("input", () => { syncStartupToMain(); saveState(); });
       el.addEventListener("change", () => { syncStartupToMain(); saveState(); });
     });
 
-    [baseUrlInput, apiKeyTtsInput, apiKeyChatInput, apiKeyGpt54Input, chatModelInput, voiceInput, formatInput, speedInput, questionCountInput, saveSettingsCheckbox, autoPlayCheckbox, autoDownloadCheckbox, permanentSaveEnabled].forEach(el => {
+    [baseUrlInput, apiKeyTtsInput, apiKeyChatInput, apiKeyGpt54Input, apiKeyTranscribeInput, chatModelInput, voiceInput, formatInput, speedInput, questionCountInput, saveSettingsCheckbox, autoPlayCheckbox, autoDownloadCheckbox, generateExpectedAnswersCheckbox, generateIntegrationQuestionsCheckbox, hideQuestionAudioButtonCheckbox, permanentSaveEnabled].forEach(el => {
       el.addEventListener("input", () => { syncMainToStartup(); saveState(); });
       el.addEventListener("change", () => { syncMainToStartup(); saveState(); });
+    });
+
+    hideQuestionAudioButtonCheckbox.addEventListener("change", () => {
+      if (hideQuestionAudioButtonCheckbox.checked && recordingQuestionId) {
+        discardQuestionRecording();
+      }
+      renderQuestions();
     });
 
     textInput.addEventListener("input", () => {
