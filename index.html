@@ -314,6 +314,7 @@
           <select id="startupChatModel">
             <option value="openai/gpt-4o-mini">openai/gpt-4o-mini</option>
             <option value="openai/gpt-5.4">openai/gpt-5.4</option>
+            <option value="openai/gpt-5.4-mini">openai/gpt-5.4-mini</option>
           </select>
         </div>
 
@@ -324,6 +325,11 @@
       </div>
 
       <div class="grid-2">
+        <div class="group">
+          <label for="startupApiKeyGpt54Mini">API Key · openai/gpt-5.4-mini (optional Override)</label>
+          <input id="startupApiKeyGpt54Mini" type="password" placeholder="Optional eigener Key nur für openai/gpt-5.4-mini" />
+        </div>
+
         <div class="group">
           <label for="startupApiKeyTranscribe">API Key · openai/gpt-4o-transcribe (optional Override)</label>
           <input id="startupApiKeyTranscribe" type="password" placeholder="Optional eigener Key nur für openai/gpt-4o-transcribe" />
@@ -376,6 +382,13 @@
                 </div>
 
                 <div class="group">
+                  <label for="apiKeyGpt54Mini">API Key · openai/gpt-5.4-mini (optional Override)</label>
+                  <input id="apiKeyGpt54Mini" type="password" placeholder="Optional eigener Key nur für openai/gpt-5.4-mini" />
+                </div>
+              </div>
+
+              <div class="grid-2">
+                <div class="group">
                   <label for="apiKeyTranscribe">API Key · openai/gpt-4o-transcribe (optional Override)</label>
                   <input id="apiKeyTranscribe" type="password" placeholder="Optional eigener Key nur für openai/gpt-4o-transcribe" />
                 </div>
@@ -387,6 +400,7 @@
                   <select id="chatModel">
                     <option value="openai/gpt-4o-mini">openai/gpt-4o-mini</option>
                     <option value="openai/gpt-5.4">openai/gpt-5.4</option>
+                    <option value="openai/gpt-5.4-mini">openai/gpt-5.4-mini</option>
                   </select>
                 </div>
               </div>
@@ -529,7 +543,7 @@
           <div class="toolbar">
             <div>
               <h2>Fehlerblöcke</h2>
-
+              <p class="subtitle">Jeder Block enthält Frage, Fehlerart, Konzept erklärt und Merksatz. Bearbeiten und Löschen ist jederzeit möglich.</p>
             </div>
             <div class="toolbar-right">
               <button id="openManualBtnTop" class="blue" type="button">Block manuell hinzufügen</button>
@@ -549,6 +563,7 @@
         <div class="top">
           <div>
             <h2>Lang-Audio-Modus</h2>
+            <p class="subtitle">Langer Text wird in Audio-Blöcke aufgeteilt. Optional wird jeder Block vorab redaktioniert, damit er flüssiger klingt.</p>
           </div>
           <div class="badge mode-l-badge">L-Modus</div>
         </div>
@@ -571,7 +586,7 @@
         </div>
 
         <div class="note" style="margin-top:10px;">
-
+          Stimme, Format und Geschwindigkeit werden aus den bestehenden erweiterten Einstellungen übernommen.
         </div>
 
         <div class="group" style="margin-top:14px;">
@@ -669,6 +684,7 @@
     const TTS_MODEL = "openai/gpt-4o-mini-tts-2025-12-15";
     const DEFAULT_CHAT_MODEL = "openai/gpt-4o-mini";
     const GPT54_MODEL = "openai/gpt-5.4";
+    const GPT54_MINI_MODEL = "openai/gpt-5.4-mini";
     const TRANSCRIBE_MODEL = "openai/gpt-4o-transcribe";
     const LONG_AUDIO_EDITOR_MODEL = "openai/gpt-5.4";
     const LONG_AUDIO_EDITOR_SYSTEM_PROMPT = `Du bist ein praeziser Redaktionsassistent. Deine Aufgabe ist es, einen eingegebenen Text inhaltlich exakt wiederzugeben und sprachlich in gut lesbaren Fliesstext zu ueberfuehren.
@@ -699,6 +715,7 @@ Vorgaben:
     const startupApiKeyTts = document.getElementById("startupApiKeyTts");
     const startupApiKeyChat = document.getElementById("startupApiKeyChat");
     const startupApiKeyGpt54 = document.getElementById("startupApiKeyGpt54");
+    const startupApiKeyGpt54Mini = document.getElementById("startupApiKeyGpt54Mini");
     const startupApiKeyTranscribe = document.getElementById("startupApiKeyTranscribe");
     const startupChatModel = document.getElementById("startupChatModel");
     const startupVoice = document.getElementById("startupVoice");
@@ -712,6 +729,7 @@ Vorgaben:
     const apiKeyTtsInput = document.getElementById("apiKeyTts");
     const apiKeyChatInput = document.getElementById("apiKeyChat");
     const apiKeyGpt54Input = document.getElementById("apiKeyGpt54");
+    const apiKeyGpt54MiniInput = document.getElementById("apiKeyGpt54Mini");
     const apiKeyTranscribeInput = document.getElementById("apiKeyTranscribe");
     const chatModelInput = document.getElementById("chatModel");
     const voiceInput = document.getElementById("voice");
@@ -900,8 +918,12 @@ Vorgaben:
       const currentModel = getCurrentChatModel();
       const standardKey = apiKeyChatInput.value.trim();
       const gpt54Key = apiKeyGpt54Input.value.trim();
+      const gpt54MiniKey = apiKeyGpt54MiniInput.value.trim();
       if (currentModel === GPT54_MODEL) {
         return gpt54Key || standardKey;
+      }
+      if (currentModel === GPT54_MINI_MODEL) {
+        return gpt54MiniKey || standardKey;
       }
       return standardKey;
     }
@@ -910,6 +932,9 @@ Vorgaben:
       const currentModel = getCurrentChatModel();
       if (currentModel === GPT54_MODEL && apiKeyGpt54Input.value.trim()) {
         return "GPT-5.4-Override-Key";
+      }
+      if (currentModel === GPT54_MINI_MODEL && apiKeyGpt54MiniInput.value.trim()) {
+        return "GPT-5.4-mini-Override-Key";
       }
       return "Standard-Chat-Key";
     }
@@ -952,6 +977,7 @@ Vorgaben:
       const hasTts = !!apiKeyTtsInput.value.trim();
       const hasStandardChat = !!apiKeyChatInput.value.trim();
       const hasGpt54 = !!apiKeyGpt54Input.value.trim();
+      const hasGpt54Mini = !!apiKeyGpt54MiniInput.value.trim();
       const hasTranscribe = !!apiKeyTranscribeInput.value.trim();
       const activeChatKey = !!getActiveChatApiKey();
       const activeTranscribeKey = !!getActiveTranscribeApiKey();
@@ -960,8 +986,8 @@ Vorgaben:
       if (hasTts && activeChatKey && activeTranscribeKey) {
         apiStateBadge.textContent = `Bereit · TTS + ${selectedModel} + ${TRANSCRIBE_MODEL}`;
       } else {
-        const count = [hasTts, hasStandardChat, hasGpt54, hasTranscribe].filter(Boolean).length;
-        apiStateBadge.textContent = `Gesetzte Keys: ${count}/4 · Modell: ${selectedModel}`;
+        const count = [hasTts, hasStandardChat, hasGpt54, hasGpt54Mini, hasTranscribe].filter(Boolean).length;
+        apiStateBadge.textContent = `Gesetzte Keys: ${count}/5 · Modell: ${selectedModel}`;
       }
     }
 
@@ -970,6 +996,7 @@ Vorgaben:
       apiKeyTtsInput.value = startupApiKeyTts.value;
       apiKeyChatInput.value = startupApiKeyChat.value;
       apiKeyGpt54Input.value = startupApiKeyGpt54.value;
+      apiKeyGpt54MiniInput.value = startupApiKeyGpt54Mini.value;
       apiKeyTranscribeInput.value = startupApiKeyTranscribe.value;
       chatModelInput.value = startupChatModel.value || DEFAULT_CHAT_MODEL;
       voiceInput.value = startupVoice.value;
@@ -982,6 +1009,7 @@ Vorgaben:
       startupApiKeyTts.value = apiKeyTtsInput.value;
       startupApiKeyChat.value = apiKeyChatInput.value;
       startupApiKeyGpt54.value = apiKeyGpt54Input.value;
+      startupApiKeyGpt54Mini.value = apiKeyGpt54MiniInput.value;
       startupApiKeyTranscribe.value = apiKeyTranscribeInput.value;
       startupChatModel.value = chatModelInput.value || DEFAULT_CHAT_MODEL;
       startupVoice.value = voiceInput.value;
@@ -1014,6 +1042,7 @@ Vorgaben:
         apiKeyTts: apiKeyTtsInput.value,
         apiKeyChat: apiKeyChatInput.value,
         apiKeyGpt54: apiKeyGpt54Input.value,
+        apiKeyGpt54Mini: apiKeyGpt54MiniInput.value,
         apiKeyTranscribe: apiKeyTranscribeInput.value,
         apiKeyEditorial: apiKeyEditorialInput.value,
         chatModel: chatModelInput.value || DEFAULT_CHAT_MODEL,
@@ -1075,6 +1104,7 @@ Vorgaben:
         apiKeyTtsInput.value = data.apiKeyTts || "";
         apiKeyChatInput.value = data.apiKeyChat || "";
         apiKeyGpt54Input.value = data.apiKeyGpt54 || "";
+        apiKeyGpt54MiniInput.value = data.apiKeyGpt54Mini || "";
         apiKeyTranscribeInput.value = data.apiKeyTranscribe || "";
         apiKeyEditorialInput.value = data.apiKeyEditorial || "";
         chatModelInput.value = data.chatModel || DEFAULT_CHAT_MODEL;
@@ -2371,25 +2401,15 @@ Du bist ein "Active-Recall Medizin Agent" und bewertest Antworten streng, kurz u
 
 SCORING-REGEL:
 0% = komplett falsch oder gefährlich = Kernaussagen falsch, widersprechen gesichertem Wissen, potenziell medizinisch riskant, keine brauchbaren richtigen Inhalte
-
 10% = fast vollständig falsch = minimale thematische Überschneidung, aber Kernaussagen falsch, starke Konzeptfehler und Halluzinationen
-
 20% = sehr große Fehler = Thema erkannt, aber Mechanismen/Definitionen weitgehend falsch, kaum verwertbar
-
 30% = teilweise richtige Richtung = einzelne korrekte Aspekte, aber zentrale Inhalte falsch oder fehlend, insgesamt unzureichend
-
 40% = deutlich lückenhaft = Grundidee teilweise richtig, aber wichtige Fehler in Logik, Terminologie oder Einordnung
-
 50% = halb richtig = Kernaussage erkennbar korrekt, aber mehrere relevante Fehler oder Auslassungen
-
 60% = überwiegend richtig = Hauptaussage korrekt, aber wichtige Details, Einschränkungen oder Differenzierungen fehlen
-
 70% = gut brauchbar = fachlich korrekt im Kern, kleinere Fehler oder Lücken, insgesamt solide aber nicht präzise genug
-
 80% = sehr gut = korrekt, strukturiert, weitgehend vollständig, nur kleinere Präzisionsmängel oder vereinfachte Darstellung
-
 90% = exzellent = sehr präzise, differenziert, nahezu vollständig, kaum Fehler, gute fachliche Tiefe
-
 100% = ideal = vollständig korrekt, präzise, differenziert, keine relevanten Fehler oder Lücken, exakt auf die Frage zugeschnitten
 
 AUSGABE:
@@ -2468,7 +2488,7 @@ Fehlerarten:
 Regeln:
 - "frage": formuliere die zugrunde liegende Prüfungsfrage oder den Kern des Problems klar und knapp.
 - "fehlerart": nur L1, L2, L3 oder L4.
-- "konzept_erklaert": erkläre das relevante Konzept medizinisch wissenschaftlich detailiert, und inhaltlich sowie Fachsprachlich an der nutzeringabe orientiert in 1 bis maximal 3 sätzen.  
+- "konzept_erklaert": erkläre das relevante Konzept medizinisch wissenschaftlich detailiert, und inhaltlich sowie Fachsprachlich an der nutzeringabe orientiert in 1 bis maximal 3 sätzen.
 - "merksatz": ein kurzer, einprägsamer Merksatz welcher den Fehler in zukunft vermeidet.
 - Keine Zusatztexte.
 - Gib ausschließlich valides JSON zurück in genau diesem Format:
@@ -3100,10 +3120,12 @@ Analysiere die Eingabe und liefere nur das JSON.
       startupApiKeyTts.value = "";
       startupApiKeyChat.value = "";
       startupApiKeyGpt54.value = "";
+      startupApiKeyGpt54Mini.value = "";
       startupApiKeyTranscribe.value = "";
       apiKeyTtsInput.value = "";
       apiKeyChatInput.value = "";
       apiKeyGpt54Input.value = "";
+      apiKeyGpt54MiniInput.value = "";
       apiKeyTranscribeInput.value = "";
       apiKeyEditorialInput.value = "";
       saveState();
@@ -3139,12 +3161,12 @@ Analysiere die Eingabe und liefere nur das JSON.
       }
     });
 
-    [startupBaseUrl, startupApiKeyTts, startupApiKeyChat, startupApiKeyGpt54, startupApiKeyTranscribe, startupChatModel, startupVoice, startupQuestionCount].forEach(el => {
+    [startupBaseUrl, startupApiKeyTts, startupApiKeyChat, startupApiKeyGpt54, startupApiKeyGpt54Mini, startupApiKeyTranscribe, startupChatModel, startupVoice, startupQuestionCount].forEach(el => {
       el.addEventListener("input", () => { syncStartupToMain(); saveState(); });
       el.addEventListener("change", () => { syncStartupToMain(); saveState(); });
     });
 
-    [baseUrlInput, apiKeyTtsInput, apiKeyChatInput, apiKeyGpt54Input, apiKeyTranscribeInput, apiKeyEditorialInput, chatModelInput, voiceInput, formatInput, speedInput, questionCountInput, longChunkSizeInput, saveSettingsCheckbox, autoPlayCheckbox, autoDownloadCheckbox, longEnableEditorialCheckbox, longAutoPlayCheckbox, longAutoDownloadCheckbox, generateExpectedAnswersCheckbox, generateIntegrationQuestionsCheckbox, hideQuestionAudioButtonCheckbox, permanentSaveEnabled].forEach(el => {
+    [baseUrlInput, apiKeyTtsInput, apiKeyChatInput, apiKeyGpt54Input, apiKeyGpt54MiniInput, apiKeyTranscribeInput, apiKeyEditorialInput, chatModelInput, voiceInput, formatInput, speedInput, questionCountInput, longChunkSizeInput, saveSettingsCheckbox, autoPlayCheckbox, autoDownloadCheckbox, longEnableEditorialCheckbox, longAutoPlayCheckbox, longAutoDownloadCheckbox, generateExpectedAnswersCheckbox, generateIntegrationQuestionsCheckbox, hideQuestionAudioButtonCheckbox, permanentSaveEnabled].forEach(el => {
       el.addEventListener("input", () => { syncMainToStartup(); saveState(); });
       el.addEventListener("change", () => { syncMainToStartup(); saveState(); });
     });
