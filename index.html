@@ -1128,6 +1128,8 @@ Vorgaben:
     let oralExamActiveQuestionId = null;
     let feedbackAudioUrl = null;
     let feedbackAudioPlayer = null;
+    let feedbackPlaybackAttemptId = 0;
+    let suppressResumeStatus = false;
     let longAudioSession = null;
     let longAudioNextChunkTimer = null;
     let longAudioShowFullPreview = false;
@@ -1191,6 +1193,7 @@ Vorgaben:
     }
 
     function resetFeedbackAudio() {
+      feedbackPlaybackAttemptId += 1;
       if (feedbackAudioPlayer) {
         feedbackAudioPlayer.pause();
         feedbackAudioPlayer.removeAttribute("src");
@@ -1899,6 +1902,44 @@ Vorgaben:
       }
     }
 
+    async function forceStartVisibleFeedbackAudio(playbackId) {
+      if (!audioPlayer.src) return false;
+      const cancelGeneration = actionCancelGeneration;
+      audioPlayer.classList.remove("hidden");
+      setStatus("Audio Feedback ist bereit. Weiter wird automatisch gedrückt ...", "info");
+
+      let lastError = null;
+      for (let attempt = 0; attempt < 18; attempt += 1) {
+        if (playbackId !== feedbackPlaybackAttemptId || cancelGeneration !== actionCancelGeneration) return false;
+        await delay(attempt === 0 ? 100 : 300);
+        if (playbackId !== feedbackPlaybackAttemptId || cancelGeneration !== actionCancelGeneration) return false;
+
+        try {
+          suppressResumeStatus = true;
+          resumeBtn.click();
+        } catch {
+        } finally {
+          setTimeout(() => { suppressResumeStatus = false; }, 500);
+        }
+
+        await delay(60);
+        try {
+          await audioPlayer.play();
+          setStatus("Audio Feedback wird abgespielt.", "ok");
+          return true;
+        } catch (err) {
+          lastError = err;
+          if (attempt === 2 || attempt === 8) {
+            setStatus("Browser blockiert noch. Die App klickt Weiter automatisch erneut ...", "info");
+          }
+        }
+      }
+
+      console.error(lastError);
+      setStatus("Audio Feedback bleibt vom Browser blockiert. Die Audio liegt im Player bereit; die App hat Weiter mehrfach automatisch ausgelöst.", "info");
+      return false;
+    }
+
     async function speakFeedbackText(feedbackText) {
       const text = String(feedbackText || "").trim();
       if (!text || !audioFeedbackCheckbox.checked) return;
@@ -1917,10 +1958,14 @@ Vorgaben:
           URL.revokeObjectURL(feedbackAudioUrl);
           feedbackAudioUrl = null;
         }
+        feedbackPlaybackAttemptId += 1;
+        const playbackId = feedbackPlaybackAttemptId;
         const blob = await requestLongAudioTtsChunk(text);
+        if (playbackId !== feedbackPlaybackAttemptId) return;
         feedbackAudioUrl = URL.createObjectURL(blob);
         feedbackAudioPlayer = new Audio(feedbackAudioUrl);
         feedbackAudioPlayer.addEventListener("ended", () => {
+          if (playbackId !== feedbackPlaybackAttemptId) return;
           if (feedbackAudioPlayer) {
             feedbackAudioPlayer.removeAttribute("src");
             try { feedbackAudioPlayer.load(); } catch {}
@@ -1953,16 +1998,9 @@ Vorgaben:
           audioPlayer.classList.remove("hidden");
           downloadLink.classList.add("hidden");
           downloadLink.removeAttribute("href");
+          try { audioPlayer.load(); } catch {}
         }
-        setStatus("Audio Feedback ist bereit. Wiedergabe startet automatisch ...", "info");
-        await delay(100);
-        try {
-          await audioPlayer.play();
-          setStatus("Audio Feedback wird abgespielt.", "ok");
-        } catch (playErr) {
-          console.error(playErr);
-          setStatus("Audio Feedback ist bereit. Falls der Browser Autoplay erneut blockiert, bitte kurz auf Weiter drücken.", "info");
-        }
+        await forceStartVisibleFeedbackAudio(feedbackPlaybackAttemptId);
       }
     }
 
@@ -4422,9 +4460,9 @@ Analysiere die Eingabe und liefere nur das JSON.
       if (audioPlayer.src) {
         try {
           await audioPlayer.play();
-          setStatus("Wiedergabe fortgesetzt.", "ok");
+          if (!suppressResumeStatus) setStatus("Wiedergabe fortgesetzt.", "ok");
         } catch {
-          setStatus("Wiedergabe konnte nicht gestartet werden.", "error");
+          if (!suppressResumeStatus) setStatus("Wiedergabe konnte nicht gestartet werden.", "error");
         }
       }
     });
