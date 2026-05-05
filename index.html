@@ -263,10 +263,39 @@
     .confirm-modal{ width:min(430px, 100%); }
     .time-input-grid{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:10px; margin-top:12px; }
     .time-input-grid input{ text-align:center; font-weight:800; }
+    .global-loading{
+      position:fixed;
+      left:14px;
+      bottom:14px;
+      z-index:2600;
+      display:flex;
+      align-items:center;
+      gap:8px;
+      width:max-content;
+      max-width:calc(100vw - 28px);
+      padding:9px 12px;
+      border-radius:999px;
+      background:var(--card);
+      color:var(--text);
+      border:1px solid var(--line);
+      box-shadow:var(--shadow);
+      font-size:12px;
+      font-weight:800;
+    }
+    .loading-spinner{
+      width:16px;
+      height:16px;
+      border-radius:999px;
+      border:2px solid var(--line);
+      border-top-color:var(--accent-2);
+      animation:spin .75s linear infinite;
+      flex:0 0 auto;
+    }
     .legacy-model-select{ display:none; }
     .kreuzen-layout{ display:grid; grid-template-columns:1fr; gap:16px; }
     .sticky-tools{ position:sticky; top:70px; }
     @keyframes pomodoroBlink{ 0%, 49.999%{ background:var(--timer-overtime-a); filter:brightness(1);} 50%, 100%{ background:var(--timer-overtime-b); filter:brightness(1.06);} }
+    @keyframes spin{ to{ transform:rotate(360deg); } }
 
     @media (min-width: 768px) {
       .app{ padding:88px 12px 30px; }
@@ -539,6 +568,7 @@
                 <label><input type="checkbox" id="hideQuestionAudioButton" /> Audio-Button bei Fragen ausblenden</label>
                 <label><input type="checkbox" id="repeatFlaggedQuestions" /> Flaggen wiederholen</label>
                 <label><input type="checkbox" id="autoFlagLowScore" /> Unter 60% automatisch flaggen</label>
+                <label><input type="checkbox" id="autoUnflagHighScore" /> Über 80% automatisch entflaggen</label>
                 <label><input type="checkbox" id="oralExamMode" /> Oral examination mode</label>
                 <label><input type="checkbox" id="autoModelSwitch" /> Automatischer Modell Switch</label>
                 <label><input type="checkbox" id="audioFeedback" /> Audio Feedback</label>
@@ -858,6 +888,11 @@
     </div>
   </div>
 
+  <div id="globalLoading" class="global-loading hidden" role="status" aria-live="polite">
+    <span class="loading-spinner" aria-hidden="true"></span>
+    <span id="globalLoadingText">Antwort wird geladen</span>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 
@@ -887,6 +922,8 @@ Vorgaben:
     const pomodoroBtn = document.getElementById("pomodoroBtn");
     const settingsBtn = document.getElementById("settingsBtn");
     const modeToggleBtn = document.getElementById("modeToggleBtn");
+    const globalLoading = document.getElementById("globalLoading");
+    const globalLoadingText = document.getElementById("globalLoadingText");
 
     const tModeSection = document.getElementById("tModeSection");
     const kModeSection = document.getElementById("kModeSection");
@@ -928,6 +965,7 @@ Vorgaben:
     const hideQuestionAudioButtonCheckbox = document.getElementById("hideQuestionAudioButton");
     const repeatFlaggedQuestionsCheckbox = document.getElementById("repeatFlaggedQuestions");
     const autoFlagLowScoreCheckbox = document.getElementById("autoFlagLowScore");
+    const autoUnflagHighScoreCheckbox = document.getElementById("autoUnflagHighScore");
     const oralExamModeCheckbox = document.getElementById("oralExamMode");
     const autoModelSwitchCheckbox = document.getElementById("autoModelSwitch");
     const audioFeedbackCheckbox = document.getElementById("audioFeedback");
@@ -1059,6 +1097,9 @@ Vorgaben:
     let resolveRecordingCompletion = null;
     let recordingChunks = [];
     let cancelTranscriptionAfterStop = false;
+    let loadingCounter = 0;
+    let loadingMessage = "Antwort wird geladen";
+    let evaluatingQuestionIds = new Set();
     let oralExamAudioByQuestionId = new Map();
     let oralExamAudioQueueRunning = false;
     let oralExamAudioGeneration = 0;
@@ -1085,6 +1126,26 @@ Vorgaben:
     function setLongStatus(message, type = "info") {
       longStatusEl.textContent = message;
       longStatusEl.className = "status " + type;
+    }
+
+    function beginLoading(message = "Antwort wird geladen") {
+      loadingCounter += 1;
+      loadingMessage = message;
+      globalLoadingText.textContent = loadingMessage;
+      globalLoading.classList.remove("hidden");
+    }
+
+    function endLoading() {
+      loadingCounter = Math.max(0, loadingCounter - 1);
+      if (loadingCounter === 0) {
+        globalLoading.classList.add("hidden");
+      } else {
+        globalLoadingText.textContent = loadingMessage;
+      }
+    }
+
+    function delay(ms) {
+      return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     function uid() {
@@ -1366,6 +1427,7 @@ Vorgaben:
         hideQuestionAudioButton: hideQuestionAudioButtonCheckbox.checked,
         repeatFlaggedQuestions: repeatFlaggedQuestionsCheckbox.checked,
         autoFlagLowScore: autoFlagLowScoreCheckbox.checked,
+        autoUnflagHighScore: autoUnflagHighScoreCheckbox.checked,
         oralExamMode: oralExamModeCheckbox.checked,
         autoModelSwitch: autoModelSwitchCheckbox.checked,
         audioFeedback: audioFeedbackCheckbox.checked,
@@ -1437,6 +1499,7 @@ Vorgaben:
         hideQuestionAudioButtonCheckbox.checked = data.hideQuestionAudioButton === true;
         repeatFlaggedQuestionsCheckbox.checked = data.repeatFlaggedQuestions === true;
         autoFlagLowScoreCheckbox.checked = data.autoFlagLowScore === true;
+        autoUnflagHighScoreCheckbox.checked = data.autoUnflagHighScore === true;
         oralExamModeCheckbox.checked = data.oralExamMode === true;
         autoModelSwitchCheckbox.checked = data.autoModelSwitch === true;
         audioFeedbackCheckbox.checked = data.audioFeedback === true;
@@ -1703,33 +1766,38 @@ Vorgaben:
         throw new Error("Geschwindigkeit muss zwischen 0.25 und 4 liegen.");
       }
 
-      const response = await fetch(`${baseUrl}/v1/audio/speech`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model: TTS_MODEL,
-          input: chunkText,
-          voice,
-          response_format: format,
-          speed
-        })
-      });
+      beginLoading("Audio wird geladen");
+      try {
+        const response = await fetch(`${baseUrl}/v1/audio/speech`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: TTS_MODEL,
+            input: chunkText,
+            voice,
+            response_format: format,
+            speed
+          })
+        });
 
-      if (!response.ok) {
-        let errorMessage = `HTTP ${response.status}`;
-        try {
-          const data = await response.json();
-          errorMessage = JSON.stringify(data, null, 2);
-        } catch {
-          errorMessage = await response.text();
+        if (!response.ok) {
+          let errorMessage = `HTTP ${response.status}`;
+          try {
+            const data = await response.json();
+            errorMessage = JSON.stringify(data, null, 2);
+          } catch {
+            errorMessage = await response.text();
+          }
+          throw new Error(errorMessage);
         }
-        throw new Error(errorMessage);
-      }
 
-      return await response.blob();
+        return await response.blob();
+      } finally {
+        endLoading();
+      }
     }
 
     async function speakFeedbackText(feedbackText) {
@@ -1764,10 +1832,26 @@ Vorgaben:
             feedbackAudioUrl = null;
           }
         }, { once: true });
-        await feedbackAudioPlayer.play();
+        let lastError = null;
+        for (let attempt = 0; attempt < 3; attempt += 1) {
+          try {
+            await feedbackAudioPlayer.play();
+            return;
+          } catch (err) {
+            lastError = err;
+            await delay(250);
+          }
+        }
+        throw lastError || new Error("Audio Feedback konnte nicht gestartet werden.");
       } catch (err) {
         console.error(err);
-        setStatus("Audio Feedback konnte nicht abgespielt werden: " + (err.message || "Unbekannter Fehler"), "error");
+        if (feedbackAudioUrl) {
+          audioPlayer.src = feedbackAudioUrl;
+          audioPlayer.classList.remove("hidden");
+          downloadLink.classList.add("hidden");
+          downloadLink.removeAttribute("href");
+        }
+        setStatus("Audio Feedback ist bereit. Der Browser hat Autoplay blockiert; bitte im Audio-Player Play drücken.", "info");
       }
     }
 
@@ -2450,35 +2534,40 @@ Vorgaben:
         throw new Error(`Kein API-Key für ${model} gesetzt. Aktive Quelle: ${getResolvedChatKeyLabel(model)}.`);
       }
 
-      const response = await fetch(`${baseUrl}/v1/chat/completions`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${apiKey}`
-        },
-        body: JSON.stringify({
-          model,
-          messages: [
-            { role: "system", content: systemPrompt },
-            { role: "user", content: userPrompt }
-          ],
-          temperature: 0.3
-        })
-      });
+      beginLoading("Antwort wird geladen");
+      try {
+        const response = await fetch(`${baseUrl}/v1/chat/completions`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            "Authorization": `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model,
+            messages: [
+              { role: "system", content: systemPrompt },
+              { role: "user", content: userPrompt }
+            ],
+            temperature: 0.3
+          })
+        });
 
-      if (!response.ok) {
-        let errorMessage = `HTTP ${response.status}`;
-        try {
-          const err = await response.json();
-          errorMessage = JSON.stringify(err, null, 2);
-        } catch {
-          errorMessage = await response.text();
+        if (!response.ok) {
+          let errorMessage = `HTTP ${response.status}`;
+          try {
+            const err = await response.json();
+            errorMessage = JSON.stringify(err, null, 2);
+          } catch {
+            errorMessage = await response.text();
+          }
+          throw new Error(errorMessage);
         }
-        throw new Error(errorMessage);
-      }
 
-      const data = await response.json();
-      return data?.choices?.[0]?.message?.content ?? "";
+        const data = await response.json();
+        return data?.choices?.[0]?.message?.content ?? "";
+      } finally {
+        endLoading();
+      }
     }
 
     function tryParseJSON(text) {
@@ -3169,21 +3258,30 @@ Erzeuge daraus Integrationsfragen.
     async function finishActiveRecordingBeforeEvaluation(questionId) {
       if (recordingQuestionId === questionId) {
         stopQuestionRecording();
-        return await waitForRecordingCompletion();
+        const completed = await waitForRecordingCompletion();
+        if (completed) await delay(350);
+        return completed;
       }
       if (transcribingQuestionId === questionId) {
         setStatus("Transkription läuft. Bewertung startet danach automatisch ...", "info");
-        return await waitForRecordingCompletion();
+        const completed = await waitForRecordingCompletion();
+        if (completed) await delay(350);
+        return completed;
       }
       return true;
     }
 
     async function evaluateQuestion(questionId) {
+      if (evaluatingQuestionIds.has(questionId)) return;
+      evaluatingQuestionIds.add(questionId);
       const sendBtn = document.querySelector(`[data-eval-id="${questionId}"]`);
       if (sendBtn) sendBtn.disabled = true;
+      renderQuestions();
 
       const recordingReady = await finishActiveRecordingBeforeEvaluation(questionId);
       if (!recordingReady) {
+        evaluatingQuestionIds.delete(questionId);
+        renderQuestions();
         if (sendBtn) sendBtn.disabled = false;
         return;
       }
@@ -3198,20 +3296,28 @@ Erzeuge daraus Integrationsfragen.
 
       if (!getActiveChatApiKey(chatModel)) {
         setStatus(`Bitte den API-Key für ${chatModel} setzen.`, "error");
+        evaluatingQuestionIds.delete(questionId);
+        renderQuestions();
         if (sendBtn) sendBtn.disabled = false;
         return;
       }
       if (!referenceText) {
         setStatus("Es fehlt eine Referenz für den Abgleich (Originaltext oder Erwartungshorizont).", "error");
+        evaluatingQuestionIds.delete(questionId);
+        renderQuestions();
         if (sendBtn) sendBtn.disabled = false;
         return;
       }
       if (!question) {
+        evaluatingQuestionIds.delete(questionId);
+        renderQuestions();
         if (sendBtn) sendBtn.disabled = false;
         return;
       }
       if (!question.answer.trim()) {
         setStatus("Bitte zuerst eine Antwort eingeben.", "error");
+        evaluatingQuestionIds.delete(questionId);
+        renderQuestions();
         if (sendBtn) sendBtn.disabled = false;
         return;
       }
@@ -3274,6 +3380,9 @@ Bewerte die Antwort ausschließlich anhand des ${referenceLabel}.
         if (autoFlagLowScoreCheckbox.checked && question.result.score < 60) {
           question.flagged = true;
         }
+        if (autoUnflagHighScoreCheckbox.checked && question.result.score > 80) {
+          question.flagged = false;
+        }
 
         saveState();
         renderQuestions();
@@ -3283,6 +3392,8 @@ Bewerte die Antwort ausschließlich anhand des ${referenceLabel}.
         console.error(err);
         setStatus("Fehler bei der Bewertung: " + err.message, "error");
       } finally {
+        evaluatingQuestionIds.delete(questionId);
+        renderQuestions();
         if (sendBtn) sendBtn.disabled = false;
       }
     }
@@ -3487,6 +3598,7 @@ Analysiere die Eingabe und liefere nur das JSON.
         const hasExpectedAnswer = !!String(q.expectedAnswer || "").trim();
         const isRecording = recordingQuestionId === q.id;
         const isTranscribing = transcribingQuestionId === q.id;
+        const isEvaluating = evaluatingQuestionIds.has(q.id);
 
         if (isIntegration) integrationCounter += 1;
         else regularCounter += 1;
@@ -3569,7 +3681,9 @@ Analysiere die Eingabe und liefere nur das JSON.
             ` : ""}
 
             <div class="btn-row">
-              <button class="blue" type="button" data-eval-id="${q.id}">Senden / Bewerten</button>
+              <button class="blue" type="button" data-eval-id="${q.id}" ${isEvaluating ? "disabled" : ""}>
+                ${isEvaluating ? "Antwort wird geladen ..." : "Senden / Bewerten"}
+              </button>
             </div>
 
             ${result ? `
@@ -4094,7 +4208,7 @@ Analysiere die Eingabe und liefere nur das JSON.
       el.addEventListener("change", () => { syncStartupToMain(); saveState(); });
     });
 
-    [baseUrlInput, apiKeyTtsInput, apiKeyChatInput, apiKeyGpt54Input, apiKeyGpt54MiniInput, apiKeyTranscribeInput, apiKeyEditorialInput, chatModelInput, voiceInput, formatInput, speedInput, questionCountInput, longChunkSizeInput, saveSettingsCheckbox, autoPlayCheckbox, autoDownloadCheckbox, longEnableEditorialCheckbox, longAutoPlayCheckbox, longAutoDownloadCheckbox, longHighlightCurrentTextCheckbox, generateExpectedAnswersCheckbox, generateIntegrationQuestionsCheckbox, hideQuestionAudioButtonCheckbox, repeatFlaggedQuestionsCheckbox, autoFlagLowScoreCheckbox, oralExamModeCheckbox, autoModelSwitchCheckbox, audioFeedbackCheckbox, kreuzenEnterToSendCheckbox, permanentSaveEnabled].forEach(el => {
+    [baseUrlInput, apiKeyTtsInput, apiKeyChatInput, apiKeyGpt54Input, apiKeyGpt54MiniInput, apiKeyTranscribeInput, apiKeyEditorialInput, chatModelInput, voiceInput, formatInput, speedInput, questionCountInput, longChunkSizeInput, saveSettingsCheckbox, autoPlayCheckbox, autoDownloadCheckbox, longEnableEditorialCheckbox, longAutoPlayCheckbox, longAutoDownloadCheckbox, longHighlightCurrentTextCheckbox, generateExpectedAnswersCheckbox, generateIntegrationQuestionsCheckbox, hideQuestionAudioButtonCheckbox, repeatFlaggedQuestionsCheckbox, autoFlagLowScoreCheckbox, autoUnflagHighScoreCheckbox, oralExamModeCheckbox, autoModelSwitchCheckbox, audioFeedbackCheckbox, kreuzenEnterToSendCheckbox, permanentSaveEnabled].forEach(el => {
       el.addEventListener("input", () => { syncMainToStartup(); saveState(); });
       el.addEventListener("change", () => { syncMainToStartup(); saveState(); });
     });
