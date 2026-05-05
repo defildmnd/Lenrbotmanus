@@ -1065,6 +1065,7 @@ Vorgaben:
     let oralExamPlayer = null;
     let oralExamActiveQuestionId = null;
     let feedbackAudioUrl = null;
+    let feedbackAudioPlayer = null;
     let longAudioSession = null;
     let longAudioNextChunkTimer = null;
     let longAudioShowFullPreview = false;
@@ -1487,6 +1488,12 @@ Vorgaben:
         URL.revokeObjectURL(currentAudioUrl);
         currentAudioUrl = null;
       }
+      if (feedbackAudioPlayer) {
+        feedbackAudioPlayer.pause();
+        feedbackAudioPlayer.removeAttribute("src");
+        try { feedbackAudioPlayer.load(); } catch {}
+        feedbackAudioPlayer = null;
+      }
       if (feedbackAudioUrl) {
         URL.revokeObjectURL(feedbackAudioUrl);
         feedbackAudioUrl = null;
@@ -1733,14 +1740,31 @@ Vorgaben:
         return;
       }
       try {
+        if (feedbackAudioPlayer) {
+          feedbackAudioPlayer.pause();
+          feedbackAudioPlayer.removeAttribute("src");
+          try { feedbackAudioPlayer.load(); } catch {}
+          feedbackAudioPlayer = null;
+        }
         if (feedbackAudioUrl) {
           URL.revokeObjectURL(feedbackAudioUrl);
           feedbackAudioUrl = null;
         }
         const blob = await requestLongAudioTtsChunk(text);
         feedbackAudioUrl = URL.createObjectURL(blob);
-        const feedbackAudio = new Audio(feedbackAudioUrl);
-        await feedbackAudio.play();
+        feedbackAudioPlayer = new Audio(feedbackAudioUrl);
+        feedbackAudioPlayer.addEventListener("ended", () => {
+          if (feedbackAudioPlayer) {
+            feedbackAudioPlayer.removeAttribute("src");
+            try { feedbackAudioPlayer.load(); } catch {}
+            feedbackAudioPlayer = null;
+          }
+          if (feedbackAudioUrl) {
+            URL.revokeObjectURL(feedbackAudioUrl);
+            feedbackAudioUrl = null;
+          }
+        }, { once: true });
+        await feedbackAudioPlayer.play();
       } catch (err) {
         console.error(err);
         setStatus("Audio Feedback konnte nicht abgespielt werden: " + (err.message || "Unbekannter Fehler"), "error");
@@ -3913,14 +3937,22 @@ Analysiere die Eingabe und liefere nur das JSON.
     function clearAll() {
       discardQuestionRecording();
       resetOralExamQuestionAudio();
+      resetLongAudioState();
       textInput.value = "";
+      longAudioTextInput.value = "";
+      kreuzenInput.value = "";
       questionCountInput.value = "";
       appState.questions = [];
+      appState.errorBlocks = [];
       resetAudio();
       updateStats();
+      updateLongStats();
       saveState();
       renderQuestions();
-      setStatus("Text, Fragen, Antworten und Bewertungen wurden vollständig zurückgesetzt.", "ok");
+      renderErrorBlocks();
+      setStatus("Text, Fragen, Antworten, Bewertungen, Lang-Audio und Kreuzen-Inhalte wurden vollständig zurückgesetzt.", "ok");
+      setLongStatus("Lang-Audio wurde vollständig zurückgesetzt.", "ok");
+      setKreuzenStatus("Alle Kreuzen-Inhalte wurden gelöscht.", "ok");
     }
 
     function clearKreuzenAll() {
