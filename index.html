@@ -1851,7 +1851,15 @@ Vorgaben:
           downloadLink.classList.add("hidden");
           downloadLink.removeAttribute("href");
         }
-        setStatus("Audio Feedback ist bereit. Der Browser hat Autoplay blockiert; bitte im Audio-Player Play drücken.", "info");
+        setStatus("Audio Feedback ist bereit. Wiedergabe startet automatisch ...", "info");
+        await delay(100);
+        try {
+          await audioPlayer.play();
+          setStatus("Audio Feedback wird abgespielt.", "ok");
+        } catch (playErr) {
+          console.error(playErr);
+          setStatus("Audio Feedback ist bereit. Falls der Browser Autoplay erneut blockiert, bitte kurz auf Weiter drücken.", "info");
+        }
       }
     }
 
