@@ -281,6 +281,7 @@
       box-shadow:var(--shadow);
       font-size:12px;
       font-weight:800;
+      cursor:pointer;
     }
     .loading-spinner{
       width:16px;
@@ -893,6 +894,21 @@
     <span id="globalLoadingText">Antwort wird geladen</span>
   </div>
 
+  <div id="cancelActionBackdrop" class="modal-backdrop hidden">
+    <div class="modal confirm-modal">
+      <div class="modal-head">
+        <div>
+          <h2>Aktion abbrechen?</h2>
+          <p class="subtitle">Laufende Anfrage wird gestoppt und der aktuelle Arbeitszustand zurückgesetzt.</p>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button id="cancelActionYesBtn" class="danger" type="button">Ja</button>
+        <button id="cancelActionNoBtn" class="secondary" type="button">Nein</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 
@@ -924,6 +940,9 @@ Vorgaben:
     const modeToggleBtn = document.getElementById("modeToggleBtn");
     const globalLoading = document.getElementById("globalLoading");
     const globalLoadingText = document.getElementById("globalLoadingText");
+    const cancelActionBackdrop = document.getElementById("cancelActionBackdrop");
+    const cancelActionYesBtn = document.getElementById("cancelActionYesBtn");
+    const cancelActionNoBtn = document.getElementById("cancelActionNoBtn");
 
     const tModeSection = document.getElementById("tModeSection");
     const kModeSection = document.getElementById("kModeSection");
@@ -1100,6 +1119,8 @@ Vorgaben:
     let loadingCounter = 0;
     let loadingMessage = "Antwort wird geladen";
     let evaluatingQuestionIds = new Set();
+    let activeAbortControllers = new Set();
+    let actionCancelGeneration = 0;
     let oralExamAudioByQuestionId = new Map();
     let oralExamAudioQueueRunning = false;
     let oralExamAudioGeneration = 0;
@@ -1146,6 +1167,78 @@ Vorgaben:
 
     function delay(ms) {
       return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    function createAbortHandle() {
+      const controller = new AbortController();
+      activeAbortControllers.add(controller);
+      controller.signal.addEventListener("abort", () => {
+        activeAbortControllers.delete(controller);
+      }, { once: true });
+      return {
+        signal: controller.signal,
+        cleanup: () => activeAbortControllers.delete(controller)
+      };
+    }
+
+    function openCancelActionModal() {
+      if (globalLoading.classList.contains("hidden")) return;
+      cancelActionBackdrop.classList.remove("hidden");
+    }
+
+    function closeCancelActionModal() {
+      cancelActionBackdrop.classList.add("hidden");
+    }
+
+    function resetFeedbackAudio() {
+      if (feedbackAudioPlayer) {
+        feedbackAudioPlayer.pause();
+        feedbackAudioPlayer.removeAttribute("src");
+        try { feedbackAudioPlayer.load(); } catch {}
+        feedbackAudioPlayer = null;
+      }
+      if (feedbackAudioUrl) {
+        URL.revokeObjectURL(feedbackAudioUrl);
+        feedbackAudioUrl = null;
+      }
+    }
+
+    function cancelCurrentAction() {
+      actionCancelGeneration += 1;
+      activeAbortControllers.forEach(controller => {
+        try { controller.abort(); } catch {}
+      });
+      activeAbortControllers.clear();
+      loadingCounter = 0;
+      globalLoading.classList.add("hidden");
+      evaluatingQuestionIds.clear();
+      closeCancelActionModal();
+      stopOralExamPlayback();
+      resetFeedbackAudio();
+      clearLongAudioWaitTimer();
+      pauseLongSegmentAudios();
+      longAudioPlayer.pause();
+      if (longAudioSession) {
+        longAudioSession.stopped = true;
+        longAudioSession.manualStop = true;
+        longAudioSession.chunks.forEach(chunk => {
+          if (chunk.status === "loading" || chunk.status === "editing") {
+            chunk.status = "pending";
+            chunk.error = null;
+          }
+        });
+      }
+      if (mediaRecorder && mediaRecorder.state !== "inactive") {
+        cancelTranscriptionAfterStop = true;
+        try { mediaRecorder.stop(); } catch {}
+      }
+      recordingQuestionId = null;
+      transcribingQuestionId = null;
+      finishRecordingCompletion(false);
+      renderQuestions();
+      renderLongAudioSegments();
+      setStatus("Aktion abgebrochen. Du kannst jetzt neu starten.", "info");
+      setLongStatus("Aktion abgebrochen. Du kannst jetzt neu starten.", "info");
     }
 
     function uid() {
@@ -1714,8 +1807,10 @@ Vorgaben:
         chunkText
       ].join("\n");
 
+      const abortHandle = createAbortHandle();
       const response = await fetch(`${baseUrl}/v1/chat/completions`, {
         method: "POST",
+        signal: abortHandle.signal,
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${apiKey}`
@@ -1729,6 +1824,7 @@ Vorgaben:
           ]
         })
       });
+      abortHandle.cleanup();
 
       if (!response.ok) {
         let errorMessage = `HTTP ${response.status}`;
@@ -1768,8 +1864,10 @@ Vorgaben:
 
       beginLoading("Audio wird geladen");
       try {
+        const abortHandle = createAbortHandle();
         const response = await fetch(`${baseUrl}/v1/audio/speech`, {
           method: "POST",
+          signal: abortHandle.signal,
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${apiKey}`
@@ -1782,6 +1880,7 @@ Vorgaben:
             speed
           })
         });
+        abortHandle.cleanup();
 
         if (!response.ok) {
           let errorMessage = `HTTP ${response.status}`;
@@ -1845,6 +1944,10 @@ Vorgaben:
         throw lastError || new Error("Audio Feedback konnte nicht gestartet werden.");
       } catch (err) {
         console.error(err);
+        if (err?.name === "AbortError") {
+          setStatus("Audio Feedback abgebrochen. Du kannst neu starten.", "info");
+          return;
+        }
         if (feedbackAudioUrl) {
           audioPlayer.src = feedbackAudioUrl;
           audioPlayer.classList.remove("hidden");
@@ -2181,6 +2284,14 @@ Vorgaben:
         renderLongAudioSegments();
         return chunk;
       } catch (err) {
+        if (err?.name === "AbortError" || session.stopped || session.id !== (longAudioSession && longAudioSession.id)) {
+          if (chunk.status === "loading" || chunk.status === "editing") {
+            chunk.status = "pending";
+            chunk.error = null;
+          }
+          renderLongAudioSegments();
+          return null;
+        }
         chunk.status = "error";
         chunk.error = err.message || "Unbekannter Fehler";
         renderLongAudioSegments();
@@ -2464,7 +2575,11 @@ Vorgaben:
         void startLongChunkGenerationQueue(longAudioSession, 1);
       } catch (err) {
         console.error(err);
-        setLongStatus("Fehler: " + err.message, "error");
+        if (err?.name === "AbortError") {
+          setLongStatus("Lang-Audio-Aktion abgebrochen. Du kannst neu starten.", "info");
+        } else {
+          setLongStatus("Fehler: " + err.message, "error");
+        }
       } finally {
         longGenerateBtn.disabled = false;
       }
@@ -2544,8 +2659,10 @@ Vorgaben:
 
       beginLoading("Antwort wird geladen");
       try {
+        const abortHandle = createAbortHandle();
         const response = await fetch(`${baseUrl}/v1/chat/completions`, {
           method: "POST",
+          signal: abortHandle.signal,
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${apiKey}`
@@ -2559,6 +2676,7 @@ Vorgaben:
             temperature: 0.3
           })
         });
+        abortHandle.cleanup();
 
         if (!response.ok) {
           let errorMessage = `HTTP ${response.status}`;
@@ -2623,8 +2741,10 @@ Vorgaben:
         resetAudio();
         saveState();
 
+        const abortHandle = createAbortHandle();
         const response = await fetch(`${baseUrl}/v1/audio/speech`, {
           method: "POST",
+          signal: abortHandle.signal,
           headers: {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${apiKey}`
@@ -2637,6 +2757,7 @@ Vorgaben:
             speed
           })
         });
+        abortHandle.cleanup();
 
         if (!response.ok) {
           let errorMessage = `HTTP ${response.status}`;
@@ -3092,13 +3213,16 @@ Erzeuge daraus Integrationsfragen.
         formData.append("file", audioBlob, `answer_${Date.now()}.${extension}`);
         formData.append("prompt", "Transkribiere die medizinische Antwort präzise auf Deutsch.");
 
+        const abortHandle = createAbortHandle();
         const response = await fetch(`${baseUrl}/v1/audio/transcriptions`, {
           method: "POST",
+          signal: abortHandle.signal,
           headers: {
             "Authorization": `Bearer ${apiKey}`
           },
           body: formData
         });
+        abortHandle.cleanup();
 
         if (!response.ok) {
           let errorMessage = `HTTP ${response.status}`;
@@ -3198,7 +3322,11 @@ Erzeuge daraus Integrationsfragen.
             finishRecordingCompletion(true);
           } catch (err) {
             console.error(err);
-            setStatus("Fehler bei der Transkription: " + err.message, "error");
+            if (err?.name === "AbortError") {
+              setStatus("Transkription abgebrochen. Du kannst neu starten.", "info");
+            } else {
+              setStatus("Fehler bei der Transkription: " + err.message, "error");
+            }
             finishRecordingCompletion(false);
           }
         });
@@ -3282,11 +3410,17 @@ Erzeuge daraus Integrationsfragen.
     async function evaluateQuestion(questionId) {
       if (evaluatingQuestionIds.has(questionId)) return;
       evaluatingQuestionIds.add(questionId);
+      const evaluationGeneration = actionCancelGeneration;
       const sendBtn = document.querySelector(`[data-eval-id="${questionId}"]`);
       if (sendBtn) sendBtn.disabled = true;
       renderQuestions();
 
       const recordingReady = await finishActiveRecordingBeforeEvaluation(questionId);
+      if (evaluationGeneration !== actionCancelGeneration) {
+        evaluatingQuestionIds.delete(questionId);
+        renderQuestions();
+        return;
+      }
       if (!recordingReady) {
         evaluatingQuestionIds.delete(questionId);
         renderQuestions();
@@ -3373,6 +3507,7 @@ Bewerte die Antwort ausschließlich anhand des ${referenceLabel}.
 
       try {
         const raw = await fetchJsonChat({ systemPrompt, userPrompt, task: "evaluation" });
+        if (evaluationGeneration !== actionCancelGeneration) return;
         const parsed = tryParseJSON(raw);
 
         if (!parsed || typeof parsed.score === "undefined") {
@@ -3398,7 +3533,11 @@ Bewerte die Antwort ausschließlich anhand des ${referenceLabel}.
         void speakFeedbackText(question.result.feedback);
       } catch (err) {
         console.error(err);
-        setStatus("Fehler bei der Bewertung: " + err.message, "error");
+        if (err?.name === "AbortError") {
+          setStatus("Bewertung abgebrochen. Du kannst neu starten.", "info");
+        } else {
+          setStatus("Fehler bei der Bewertung: " + err.message, "error");
+        }
       } finally {
         evaluatingQuestionIds.delete(questionId);
         renderQuestions();
@@ -4143,6 +4282,13 @@ Analysiere die Eingabe und liefere nur das JSON.
       if (e.target === settingsModalBackdrop) closeSettingsModal();
     });
 
+    globalLoading.addEventListener("click", openCancelActionModal);
+    cancelActionYesBtn.addEventListener("click", cancelCurrentAction);
+    cancelActionNoBtn.addEventListener("click", closeCancelActionModal);
+    cancelActionBackdrop.addEventListener("click", (e) => {
+      if (e.target === cancelActionBackdrop) closeCancelActionModal();
+    });
+
     chatModelSegment.querySelectorAll("[data-chat-model-option]").forEach(btn => {
       btn.addEventListener("click", () => {
         chatModelInput.value = normalizeChatModel(btn.dataset.chatModelOption);
@@ -4442,6 +4588,10 @@ Analysiere die Eingabe und liefere nur das JSON.
     });
 
     document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !cancelActionBackdrop.classList.contains("hidden")) {
+        closeCancelActionModal();
+        return;
+      }
       if (e.key === "Escape" && !settingsModalBackdrop.classList.contains("hidden")) {
         closeSettingsModal();
         return;
