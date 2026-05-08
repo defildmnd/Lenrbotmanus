@@ -909,6 +909,22 @@
     </div>
   </div>
 
+  <div id="modeClearBackdrop" class="modal-backdrop hidden">
+    <div class="modal confirm-modal">
+      <div class="modal-head">
+        <div>
+          <h2 id="modeClearTitle">Modus zurücksetzen?</h2>
+          <p id="modeClearText" class="subtitle">Bist du dir sicher, dass die Inhalte in diesem Modus zurückgesetzt werden sollen?</p>
+          <p class="subtitle">Alle Inhalte gehen dabei verloren.</p>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button id="modeClearConfirmBtn" class="danger" type="button">Clear</button>
+        <button id="modeClearCancelBtn" class="secondary" type="button">Abbruch</button>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/jspdf@2.5.1/dist/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/jspdf-autotable@3.8.2/dist/jspdf.plugin.autotable.min.js"></script>
 
@@ -943,6 +959,11 @@ Vorgaben:
     const cancelActionBackdrop = document.getElementById("cancelActionBackdrop");
     const cancelActionYesBtn = document.getElementById("cancelActionYesBtn");
     const cancelActionNoBtn = document.getElementById("cancelActionNoBtn");
+    const modeClearBackdrop = document.getElementById("modeClearBackdrop");
+    const modeClearTitle = document.getElementById("modeClearTitle");
+    const modeClearText = document.getElementById("modeClearText");
+    const modeClearConfirmBtn = document.getElementById("modeClearConfirmBtn");
+    const modeClearCancelBtn = document.getElementById("modeClearCancelBtn");
 
     const tModeSection = document.getElementById("tModeSection");
     const kModeSection = document.getElementById("kModeSection");
@@ -1121,6 +1142,7 @@ Vorgaben:
     let evaluatingQuestionIds = new Set();
     let activeAbortControllers = new Set();
     let actionCancelGeneration = 0;
+    let pendingModeClearAction = null;
     let oralExamAudioByQuestionId = new Map();
     let oralExamAudioQueueRunning = false;
     let oralExamAudioGeneration = 0;
@@ -1190,6 +1212,26 @@ Vorgaben:
 
     function closeCancelActionModal() {
       cancelActionBackdrop.classList.add("hidden");
+    }
+
+    function openModeClearConfirm(modeName, clearAction) {
+      pendingModeClearAction = clearAction;
+      modeClearTitle.textContent = `${modeName} zurücksetzen?`;
+      modeClearText.textContent = `Bist du dir sicher, dass die Inhalte in diesem Modus (${modeName}) zurückgesetzt werden sollen?`;
+      modeClearBackdrop.classList.remove("hidden");
+    }
+
+    function closeModeClearConfirm() {
+      modeClearBackdrop.classList.add("hidden");
+      pendingModeClearAction = null;
+    }
+
+    function confirmModeClear() {
+      const action = pendingModeClearAction;
+      closeModeClearConfirm();
+      if (typeof action === "function") {
+        action();
+      }
     }
 
     function resetFeedbackAudio() {
@@ -4236,22 +4278,14 @@ Analysiere die Eingabe und liefere nur das JSON.
     function clearAll() {
       discardQuestionRecording();
       resetOralExamQuestionAudio();
-      resetLongAudioState();
       textInput.value = "";
-      longAudioTextInput.value = "";
-      kreuzenInput.value = "";
       questionCountInput.value = "";
       appState.questions = [];
-      appState.errorBlocks = [];
       resetAudio();
       updateStats();
-      updateLongStats();
       saveState();
       renderQuestions();
-      renderErrorBlocks();
-      setStatus("Text, Fragen, Antworten, Bewertungen, Lang-Audio und Kreuzen-Inhalte wurden vollständig zurückgesetzt.", "ok");
-      setLongStatus("Lang-Audio wurde vollständig zurückgesetzt.", "ok");
-      setKreuzenStatus("Alle Kreuzen-Inhalte wurden gelöscht.", "ok");
+      setStatus("Text-und-Vorlesen-Modus wurde zurückgesetzt. Kreuzen und Lang-Audio bleiben unverändert.", "ok");
     }
 
     function clearKreuzenAll() {
@@ -4325,6 +4359,12 @@ Analysiere die Eingabe und liefere nur das JSON.
     cancelActionNoBtn.addEventListener("click", closeCancelActionModal);
     cancelActionBackdrop.addEventListener("click", (e) => {
       if (e.target === cancelActionBackdrop) closeCancelActionModal();
+    });
+
+    modeClearConfirmBtn.addEventListener("click", confirmModeClear);
+    modeClearCancelBtn.addEventListener("click", closeModeClearConfirm);
+    modeClearBackdrop.addEventListener("click", (e) => {
+      if (e.target === modeClearBackdrop) closeModeClearConfirm();
     });
 
     chatModelSegment.querySelectorAll("[data-chat-model-option]").forEach(btn => {
@@ -4606,16 +4646,16 @@ Analysiere die Eingabe und liefere nur das JSON.
       }
     });
 
-    clearAllBtn.addEventListener("click", clearAll);
-    longClearBtn.addEventListener("click", clearLongAudioAll);
-    clearQuestionsBtn.addEventListener("click", clearQuestionsOnly);
+    clearAllBtn.addEventListener("click", () => openModeClearConfirm("Text und Vorlesen", clearAll));
+    longClearBtn.addEventListener("click", () => openModeClearConfirm("Lang-Audio-Modus", clearLongAudioAll));
+    clearQuestionsBtn.addEventListener("click", () => openModeClearConfirm("Fragen im Text-und-Vorlesen-Modus", clearQuestionsOnly));
     exportBtn.addEventListener("click", exportQuestions);
 
     addManualBtn.addEventListener("click", () => openEditModal());
     openManualBtnTop.addEventListener("click", () => openEditModal());
     exportKreuzenTxtBtn.addEventListener("click", exportKreuzenTxt);
     exportKreuzenPdfBtn.addEventListener("click", exportKreuzenPdf);
-    clearKreuzenBtn.addEventListener("click", clearKreuzenAll);
+    clearKreuzenBtn.addEventListener("click", () => openModeClearConfirm("Kreuzen-Modus", clearKreuzenAll));
 
     closeModalBtn.addEventListener("click", closeEditModal);
     cancelModalBtn.addEventListener("click", closeEditModal);
@@ -4626,6 +4666,10 @@ Analysiere die Eingabe und liefere nur das JSON.
     });
 
     document.addEventListener("keydown", (e) => {
+      if (e.key === "Escape" && !modeClearBackdrop.classList.contains("hidden")) {
+        closeModeClearConfirm();
+        return;
+      }
       if (e.key === "Escape" && !cancelActionBackdrop.classList.contains("hidden")) {
         closeCancelActionModal();
         return;
